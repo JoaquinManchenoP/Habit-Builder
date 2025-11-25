@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import HabitCard from "../components/HabitCard";
 import Header from "../components/Header";
 import Button from "../components/Button";
-import { getHabits } from "../lib/habits";
+import { getHabits, markHabitCompleted } from "../lib/habits";
 import Link from "next/link";
 
 export default function HabitsPage() {
@@ -15,6 +15,11 @@ export default function HabitsPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHabits(getHabits());
   }, []);
+
+  const handleComplete = (id) => {
+    const updated = markHabitCompleted(id);
+    setHabits(updated);
+  };
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -37,11 +42,15 @@ export default function HabitsPage() {
               Start by creating a new habit.
             </p>
           ) : (
-            <div className="space-y-3">
-              {habits.map((habit) => (
-                <HabitCard key={habit.id} habit={habit} />
-              ))}
-            </div>
+              <div className="space-y-3">
+                {habits.map((habit) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                    onComplete={handleComplete}
+                  />
+                ))}
+              </div>
           )}
         </section>
       </div>
