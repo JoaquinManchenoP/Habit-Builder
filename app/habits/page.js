@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import HabitCard from "../components/HabitCard";
 import Header from "../components/Header";
 import Button from "../components/Button";
-import { getHabits, markHabitCompleted } from "../lib/habits";
+import { deleteHabit, getHabits, markHabitCompleted } from "../lib/habits";
 import Link from "next/link";
 
 export default function HabitsPage() {
@@ -18,6 +18,11 @@ export default function HabitsPage() {
 
   const handleComplete = (id) => {
     const updated = markHabitCompleted(id);
+    setHabits(updated);
+  };
+
+  const handleDelete = (id) => {
+    const updated = deleteHabit(id);
     setHabits(updated);
   };
 
@@ -42,15 +47,16 @@ export default function HabitsPage() {
               Start by creating a new habit.
             </p>
           ) : (
-              <div className="space-y-3">
-                {habits.map((habit) => (
-                  <HabitCard
-                    key={habit.id}
-                    habit={habit}
-                    onComplete={handleComplete}
-                  />
-                ))}
-              </div>
+            <div className="space-y-3">
+              {habits.map((habit) => (
+                <HabitCard
+                  key={habit.id}
+                  habit={habit}
+                  onComplete={handleComplete}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
           )}
         </section>
       </div>

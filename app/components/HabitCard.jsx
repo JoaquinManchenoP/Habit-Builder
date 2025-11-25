@@ -41,13 +41,14 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
             </Button>
           ) : null}
           {onDelete ? (
-            <Button
+            <button
               type="button"
-              className="bg-red-500 hover:bg-red-400 focus-visible:outline-red-500"
+              aria-label="Delete habit"
               onClick={() => onDelete(habit.id)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-red-100 text-sm font-bold text-red-600 transition hover:bg-red-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
             >
-              Delete
-            </Button>
+              ×
+            </button>
           ) : null}
         </div>
       </div>
