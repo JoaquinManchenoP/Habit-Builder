@@ -14,10 +14,21 @@ const getStorage = () => {
   return window.localStorage;
 };
 
-const normalizeHabit = (habit) => ({
-  ...habit,
-  completions: Array.isArray(habit.completions) ? habit.completions : [],
-});
+const normalizeHabit = (habit) => {
+  const completions = Array.isArray(habit.completions) ? habit.completions : [];
+  // Default the creation date to the earliest completion or today so
+  // downstream features can reason about when the habit became active.
+  const createdAt =
+    habit.createdAt ||
+    (completions.length ? completions[0] : new Date().toISOString().slice(0, 10));
+
+  return {
+    ...habit,
+    createdAt,
+    completions,
+    isMock: Boolean(habit.isMock),
+  };
+};
 
 const readHabits = () => {
   const storage = getStorage();
@@ -32,7 +43,8 @@ const readHabits = () => {
 const persistHabits = (habits) => {
   const storage = getStorage();
   if (!storage) return;
-  storage.setItem(STORAGE_KEY, JSON.stringify(habits));
+  const userHabits = habits.filter((habit) => !habit.isMock);
+  storage.setItem(STORAGE_KEY, JSON.stringify(userHabits));
 };
 
 export function getHabits() {
@@ -47,7 +59,9 @@ export function createHabit(name) {
         ? crypto.randomUUID()
         : Date.now().toString(),
     name,
+    createdAt: new Date().toISOString().slice(0, 10),
     completions: [],
+    isMock: false,
   };
   const updated = [...habits, newHabit];
   persistHabits(updated);
@@ -75,6 +89,7 @@ export function markHabitCompleted(id) {
 
     return {
       ...habit,
+      createdAt: habit.createdAt || isoDate,
       completions: [...habit.completions, isoDate],
     };
   });
