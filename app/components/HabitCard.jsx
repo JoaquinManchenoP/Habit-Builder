@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Button from "./Button";
 
 const buildRecentDays = (completions = []) => {
@@ -22,13 +23,21 @@ const buildRecentDays = (completions = []) => {
 };
 
 export default function HabitCard({ habit, onDelete, onComplete }) {
+  const router = useRouter();
   const days = useMemo(
     () => buildRecentDays(habit.completions || []),
     [habit.completions],
   );
 
+  const handleCardClick = () => {
+    router.push(`/habits/${habit.id}`);
+  };
+
   return (
-    <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div
+      className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      onClick={handleCardClick}
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
@@ -42,7 +51,13 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
         </div>
         <div className="flex gap-2">
           {onComplete ? (
-            <Button type="button" onClick={() => onComplete(habit.id)}>
+            <Button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onComplete(habit.id);
+              }}
+            >
               Completed
             </Button>
           ) : null}
@@ -50,7 +65,10 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
             <button
               type="button"
               aria-label="Delete habit"
-              onClick={() => onDelete(habit.id)}
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete(habit.id);
+              }}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-red-100 text-sm font-bold text-red-600 transition hover:bg-red-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
             >
               ×
