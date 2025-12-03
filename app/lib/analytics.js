@@ -61,6 +61,7 @@ const buildMockHabits = (today = new Date()) => {
       id: "mock-1",
       name: "Morning Run",
       createdAt: iso(-21),
+      isMock: true,
       completions: [
         iso(-21),
         iso(-19),
@@ -75,6 +76,7 @@ const buildMockHabits = (today = new Date()) => {
       id: "mock-2",
       name: "Read 20 Pages",
       createdAt: iso(-17),
+      isMock: true,
       completions: [
         iso(-13),
         iso(-12),
@@ -88,6 +90,7 @@ const buildMockHabits = (today = new Date()) => {
       id: "mock-3",
       name: "Meditate",
       createdAt: iso(-9),
+      isMock: true,
       completions: [iso(-8), iso(-2), iso(0)],
     },
   ];

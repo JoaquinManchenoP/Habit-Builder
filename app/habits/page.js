@@ -6,8 +6,7 @@ import Header from "../components/Header";
 import Button from "../components/Button";
 import { deleteHabit, markHabitCompleted } from "../lib/habits";
 import Link from "next/link";
-import { loadHabitsWithMock } from "../lib/habitData";
-import { applyColors } from "../lib/analytics";
+import { deleteMockHabit, loadHabitsWithMock, markMockHabitCompleted } from "../lib/habitData";
 
 export default function HabitsPage() {
   const [habits, setHabits] = useState([]);
@@ -26,13 +25,33 @@ export default function HabitsPage() {
   }, []);
 
   const handleComplete = (id) => {
-    const updated = markHabitCompleted(id);
-    setHabits(applyColors(updated));
+    const habit = habits.find((item) => item.id === id);
+    if (!habit) return;
+
+    if (habit.isMock) {
+      markMockHabitCompleted(id);
+    } else {
+      markHabitCompleted(id);
+    }
+
+    const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
+    setHabits(hydrated);
+    setUsingMockData(usingMock);
   };
 
   const handleDelete = (id) => {
-    const updated = deleteHabit(id);
-    setHabits(applyColors(updated));
+    const habit = habits.find((item) => item.id === id);
+    if (!habit) return;
+
+    if (habit.isMock) {
+      deleteMockHabit(id);
+    } else {
+      deleteHabit(id);
+    }
+
+    const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
+    setHabits(hydrated);
+    setUsingMockData(usingMock);
   };
 
   return (
@@ -68,8 +87,8 @@ export default function HabitsPage() {
                 <HabitCard
                   key={habit.id}
                   habit={habit}
-                  onComplete={!usingMockData ? handleComplete : undefined}
-                  onDelete={!usingMockData ? handleDelete : undefined}
+                  onComplete={handleComplete}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>

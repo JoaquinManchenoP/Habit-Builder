@@ -26,6 +26,7 @@ const normalizeHabit = (habit) => {
     ...habit,
     createdAt,
     completions,
+    isMock: Boolean(habit.isMock),
   };
 };
 
@@ -42,7 +43,8 @@ const readHabits = () => {
 const persistHabits = (habits) => {
   const storage = getStorage();
   if (!storage) return;
-  storage.setItem(STORAGE_KEY, JSON.stringify(habits));
+  const userHabits = habits.filter((habit) => !habit.isMock);
+  storage.setItem(STORAGE_KEY, JSON.stringify(userHabits));
 };
 
 export function getHabits() {
@@ -59,6 +61,7 @@ export function createHabit(name) {
     name,
     createdAt: new Date().toISOString().slice(0, 10),
     completions: [],
+    isMock: false,
   };
   const updated = [...habits, newHabit];
   persistHabits(updated);

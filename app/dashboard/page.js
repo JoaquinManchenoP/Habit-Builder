@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "../components/Header";
 import { buildWeeklyPercentages } from "../lib/analytics";
 import { loadHabitsWithMock } from "../lib/habitData";
@@ -30,6 +30,65 @@ const buildPath = (points, xScale, yScale) => {
 };
 
 const MultiLineChart = ({ weeks, series }) => {
+  const [hoverInfo, setHoverInfo] = useState(null);
+  const [tooltipSize, setTooltipSize] = useState({ width: 120, height: 32 });
+  const containerRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const pathRefs = useRef({});
+  const updateHoverPosition = (event, habitName) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    setHoverInfo({
+      name: habitName,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+  };
+  const tooltipStyle = (() => {
+    if (!hoverInfo || !containerRef.current) return null;
+    const rect = containerRef.current.getBoundingClientRect();
+    const desiredLeft = hoverInfo.x + 12;
+    const desiredTop = hoverInfo.y - tooltipSize.height - 8;
+    const left = Math.min(
+      Math.max(desiredLeft, 0),
+      rect.width - tooltipSize.width,
+    );
+    const top = Math.min(Math.max(desiredTop, 0), rect.height - tooltipSize.height);
+    return { left, top };
+  })();
+
+  useEffect(() => {
+    if (!tooltipRef.current) return;
+    const { width, height } = tooltipRef.current.getBoundingClientRect();
+    if (!width || !height) return;
+    setTooltipSize((prev) => {
+      if (prev.width === width && prev.height === height) return prev;
+      return { width, height };
+    });
+  }, [hoverInfo]);
+
+  useEffect(() => {
+    const paths = Object.values(pathRefs.current);
+    paths.forEach((path) => {
+      if (!path) return;
+      path.getAnimations().forEach((anim) => anim.cancel());
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = `${length}`;
+      path.style.strokeDashoffset = `${length}`;
+      path.animate(
+        [
+          { strokeDashoffset: length },
+          { strokeDashoffset: 0 },
+        ],
+        {
+          duration: 1500,
+          easing: "ease-in-out",
+          fill: "forwards",
+        },
+      );
+    });
+  }, [series]);
+
   if (!weeks.length || !series.length) {
     return (
       <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
@@ -59,129 +118,177 @@ const MultiLineChart = ({ weeks, series }) => {
   const yTicks = [0, 25, 50, 75, 100];
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label="Weekly completion percentage per habit"
-      className="w-full overflow-visible rounded-xl border border-slate-200 bg-white shadow-sm"
-    >
-      <g>
-        {/* Y-axis grid lines and labels */}
-        {yTicks.map((tick) => {
-          const y = yScale(tick);
-          return (
-            <g key={tick}>
-              <line
-                x1={margin.left}
-                x2={width - margin.right}
-                y1={y}
-                y2={y}
-                stroke="#e2e8f0"
-                strokeWidth="1"
-              />
-              <text
-                x={margin.left - 12}
-                y={y + 4}
-                textAnchor="end"
-                fontSize="12"
-                fill="#475569"
-              >
-                {tick}%
-              </text>
-            </g>
-          );
-        })}
-
-        {/* X-axis grid lines and labels */}
-        {weeks.map((week, index) => {
-          const x = xScale(index);
-          return (
-            <g key={week.key}>
-              <line
-                x1={x}
-                x2={x}
-                y1={margin.top}
-                y2={height - margin.bottom}
-                stroke="#e2e8f0"
-                strokeWidth="1"
-              />
-              <text
-                x={x}
-                y={height - margin.bottom + 28}
-                textAnchor="middle"
-                fontSize="12"
-                fill="#475569"
-              >
-                {week.label}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Lines */}
-        {series.map((line) => {
-          const path = buildPath(line.points, xScale, yScale);
-          if (!path) return null;
-          return (
-            <path
-              key={line.id}
-              d={path}
-              fill="none"
-              stroke={line.color}
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+    <div ref={containerRef} className="relative">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="Weekly completion percentage per habit"
+        className="w-full overflow-visible rounded-xl border border-slate-200 bg-white shadow-sm"
+      >
+        <defs>
+          <filter id="lineShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow
+              dx="0"
+              dy="4"
+              stdDeviation="3.5"
+              floodColor="rgba(15,23,42,0.32)"
+              floodOpacity="1"
             />
-          );
-        })}
-
-        {/* Data points */}
-        {series.map((line) =>
-          line.points.map((point, index) => {
-            if (point.value === null) return null;
-            const x = xScale(index);
-            const y = yScale(point.value);
+            <feDropShadow
+              dx="0"
+              dy="8"
+              stdDeviation="6"
+              floodColor="rgba(15,23,42,0.18)"
+              floodOpacity="1"
+            />
+          </filter>
+        </defs>
+        <g>
+          {/* Y-axis grid lines and labels */}
+          {yTicks.map((tick) => {
+            const y = yScale(tick);
             return (
-              <g key={`${line.id}-${point.key}`} className="transition-opacity">
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={5}
-                  fill={line.color}
-                  stroke="#ffffff"
-                  strokeWidth="2"
+              <g key={tick}>
+                <line
+                  x1={margin.left}
+                  x2={width - margin.right}
+                  y1={y}
+                  y2={y}
+                  stroke="#e2e8f0"
+                  strokeWidth="1"
                 />
-                <title>
-                  {`${line.name} — ${point.label}: ${point.value.toFixed(1)}%`}
-                </title>
+                <text
+                  x={margin.left - 12}
+                  y={y + 4}
+                  textAnchor="end"
+                  fontSize="12"
+                  fill="#475569"
+                >
+                  {tick}%
+                </text>
               </g>
             );
-          }),
-        )}
-      </g>
+          })}
 
-      {/* Axis titles */}
-      <text
-        x={margin.left}
-        y={margin.top - 6}
-        textAnchor="start"
-        fontSize="12"
-        fill="#1f2937"
-        fontWeight="600"
-      >
-        Weekly completion (%)
-      </text>
-      <text
-        x={width / 2}
-        y={height - 20}
-        textAnchor="middle"
-        fontSize="12"
-        fill="#1f2937"
-        fontWeight="600"
-      >
-        Calendar weeks
-      </text>
-    </svg>
+          {/* X-axis grid lines and labels */}
+          {weeks.map((week, index) => {
+            const x = xScale(index);
+            return (
+              <g key={week.key}>
+                <line
+                  x1={x}
+                  x2={x}
+                  y1={margin.top}
+                  y2={height - margin.bottom}
+                  stroke="#e2e8f0"
+                  strokeWidth="1"
+                />
+                <text
+                  x={x}
+                  y={height - margin.bottom + 28}
+                  textAnchor="middle"
+                  fontSize="12"
+                  fill="#475569"
+                >
+                  {week.label}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Lines */}
+          {series.map((line) => {
+            const path = buildPath(line.points, xScale, yScale);
+            if (!path) return null;
+            return (
+              <path
+                key={line.id}
+                d={path}
+                fill="none"
+                stroke={line.color}
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="2"
+                filter="url(#lineShadow)"
+                onMouseEnter={(event) => updateHoverPosition(event, line.name)}
+                onMouseMove={(event) => updateHoverPosition(event, line.name)}
+                onMouseLeave={() => setHoverInfo(null)}
+                ref={(el) => {
+                  if (el) {
+                    pathRefs.current[line.id] = el;
+                  } else {
+                    delete pathRefs.current[line.id];
+                  }
+                }}
+              />
+            );
+          })}
+
+          {/* Data points */}
+          {series.map((line) =>
+            line.points.map((point, index) => {
+              if (point.value === null) return null;
+              const x = xScale(index);
+              const y = yScale(point.value);
+              return (
+                <g
+                  key={`${line.id}-${point.key}`}
+                  className="transition-opacity"
+                  onMouseEnter={(event) => updateHoverPosition(event, line.name)}
+                  onMouseMove={(event) => updateHoverPosition(event, line.name)}
+                  onMouseLeave={() => setHoverInfo(null)}
+                >
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={5}
+                    fill={line.color}
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                  />
+                  <title>
+                    {`${line.name} — ${point.label}: ${point.value.toFixed(1)}%`}
+                  </title>
+                </g>
+              );
+            }),
+          )}
+        </g>
+
+        {/* Axis titles */}
+        <text
+          x={margin.left}
+          y={margin.top - 6}
+          textAnchor="start"
+          fontSize="12"
+          fill="#1f2937"
+          fontWeight="600"
+        >
+          Weekly completion (%)
+        </text>
+        <text
+          x={width / 2}
+          y={height - 20}
+          textAnchor="middle"
+          fontSize="12"
+          fill="#1f2937"
+          fontWeight="600"
+        >
+          Calendar weeks
+        </text>
+      </svg>
+
+      {hoverInfo && tooltipStyle ? (
+        <div
+          ref={tooltipRef}
+          className="pointer-events-none absolute rounded-md bg-slate-900 px-2 py-1 text-xs font-semibold text-white shadow-md"
+          style={tooltipStyle}
+        >
+          {hoverInfo.name}
+        </div>
+      ) : null}
+    </div>
   );
 };
 
