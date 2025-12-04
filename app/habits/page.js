@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import HabitCard from "../components/HabitCard";
 import Header from "../components/Header";
 import Button from "../components/Button";
+import PageContainer from "../components/PageContainer";
 import { deleteHabit, markHabitCompleted } from "../lib/habits";
 import Link from "next/link";
 import { deleteMockHabit, loadHabitsWithMock, markMockHabitCompleted } from "../lib/habitData";
@@ -56,7 +57,7 @@ export default function HabitsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-3xl space-y-6 p-6">
+      <PageContainer>
         <Header />
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -82,7 +83,7 @@ export default function HabitsPage() {
               Start by creating a new habit.
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {habits.map((habit) => (
                 <HabitCard
                   key={habit.id}
@@ -94,7 +95,7 @@ export default function HabitsPage() {
             </div>
           )}
         </section>
-      </div>
+      </PageContainer>
     </main>
   );
 }

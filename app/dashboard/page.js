@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "../components/Header";
+import PageContainer from "../components/PageContainer";
 import { buildWeeklyPercentages } from "../lib/analytics";
 import { loadHabitsWithMock } from "../lib/habitData";
 
@@ -315,7 +316,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-5xl space-y-6 p-6">
+      <PageContainer>
         <Header />
 
         <section className="space-y-2">
@@ -360,7 +361,7 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : null}
-      </div>
+      </PageContainer>
     </main>
   );
 }

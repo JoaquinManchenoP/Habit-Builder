@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../../components/Button";
 import Header from "../../components/Header";
+import PageContainer from "../../components/PageContainer";
 import { createHabit } from "../../lib/habits";
 
 export default function NewHabitPage() {
@@ -26,7 +27,7 @@ export default function NewHabitPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-3xl space-y-6 p-6">
+      <PageContainer>
         <Header />
         <section className="space-y-4">
           <div className="space-y-1">
@@ -55,7 +56,7 @@ export default function NewHabitPage() {
             </div>
           </form>
         </section>
-      </div>
+      </PageContainer>
     </main>
   );
 }
