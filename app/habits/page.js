@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import HabitCard from "../components/HabitCard";
 import Header from "../components/Header";
 import Button from "../components/Button";
+import PageContainer from "../components/PageContainer";
 import { deleteHabit, markHabitCompleted } from "../lib/habits";
 import Link from "next/link";
 import { deleteMockHabit, loadHabitsWithMock, markMockHabitCompleted } from "../lib/habitData";
@@ -11,6 +12,7 @@ import { deleteMockHabit, loadHabitsWithMock, markMockHabitCompleted } from "../
 export default function HabitsPage() {
   const [habits, setHabits] = useState([]);
   const [usingMockData, setUsingMockData] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   useEffect(() => {
     const hydrate = () => {
@@ -54,9 +56,25 @@ export default function HabitsPage() {
     setUsingMockData(usingMock);
   };
 
+  const handleDeleteRequest = (id) => {
+    setPendingDeleteId(id);
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDeleteId(null);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!pendingDeleteId) return;
+    handleDelete(pendingDeleteId);
+    setPendingDeleteId(null);
+  };
+
+  const pendingHabit = habits.find((habit) => habit.id === pendingDeleteId);
+
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-3xl space-y-6 p-6">
+      <PageContainer>
         <Header />
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -82,19 +100,48 @@ export default function HabitsPage() {
               Start by creating a new habit.
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {habits.map((habit) => (
                 <HabitCard
                   key={habit.id}
                   habit={habit}
                   onComplete={handleComplete}
-                  onDelete={handleDelete}
+                  onDelete={handleDeleteRequest}
                 />
               ))}
             </div>
           )}
         </section>
-      </div>
+        {pendingDeleteId ? (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-2xl">
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-slate-900">Delete habit?</h2>
+                <p className="text-sm text-slate-600">
+                  You are about to delete {pendingHabit?.name || "this habit"}. This action
+                  cannot be undone.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    className="rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                    onClick={handleCancelDelete}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                    onClick={handleConfirmDelete}
+                  >
+                    Yes, delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </PageContainer>
     </main>
   );
 }

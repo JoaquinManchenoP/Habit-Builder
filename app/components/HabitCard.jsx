@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import Button from "./Button";
 
 const buildRecentDays = (completions = []) => {
   const today = new Date();
@@ -26,7 +25,7 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
   const router = useRouter();
   const days = useMemo(
     () => buildRecentDays(habit.completions || []),
-    [habit.completions],
+    [habit.completions]
   );
 
   const handleCardClick = () => {
@@ -35,7 +34,7 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
 
   return (
     <div
-      className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      className="relative space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition transform hover:scale-[1.02] active:scale-[0.99]"
       onClick={handleCardClick}
     >
       <div className="flex items-start justify-between gap-3">
@@ -45,43 +44,46 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
               className="h-3 w-6 rounded-full"
               style={{ backgroundColor: habit.color || "#10b981" }}
             />
-            <p className="text-base font-semibold text-slate-900">{habit.name}</p>
+            <p className="text-base font-semibold text-slate-900">
+              {habit.name}
+            </p>
           </div>
-          <p className="text-sm text-slate-500">Track your progress here.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mr-6">
           {onComplete ? (
-            <Button
+            <button
               type="button"
+              aria-label="Mark habit completed"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-600 transition hover:bg-green-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500"
               onClick={(event) => {
                 event.stopPropagation();
                 onComplete(habit.id);
               }}
             >
-              Completed
-            </Button>
-          ) : null}
-          {onDelete ? (
-            <button
-              type="button"
-              aria-label="Delete habit"
-              onClick={(event) => {
-                event.stopPropagation();
-                onDelete(habit.id);
-              }}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-red-100 text-sm font-bold text-red-600 transition hover:bg-red-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-            >
-              ×
+              ✓
             </button>
           ) : null}
         </div>
       </div>
+      {onDelete ? (
+        <button
+          type="button"
+          aria-label="Delete habit"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete(habit.id);
+          }}
+          className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-600 shadow-sm transition hover:bg-red-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+        >
+          ×
+        </button>
+      ) : null}
       <div className="space-y-2">
-        <div className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-[2px] text-xs">
+        <div className="grid grid-flow-col grid-rows-7 gap-y-[1.5px] gap-x-[7px] justify-center px-[2px] text-xs">
           {days.map((day) => (
             <div
               key={day.iso}
-              className="h-4 w-4 rounded-sm border border-slate-200"
+              className="h-[18px] w-[18px] rounded-sm border border-slate-200"
               style={{
                 backgroundColor: day.completed
                   ? habit.color || "#10b981"
@@ -92,8 +94,8 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
           ))}
         </div>
         <p className="text-xs text-slate-500">
-          Showing the last 90 days. Mark today as completed to keep your
-          streak going.
+          Showing the last 90 days. Mark today as completed to keep your streak
+          going.
         </p>
       </div>
     </div>
