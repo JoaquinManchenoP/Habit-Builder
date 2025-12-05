@@ -21,7 +21,13 @@ const buildRecentDays = (completions = []) => {
   });
 };
 
-export default function HabitCard({ habit, onDelete, onComplete }) {
+export default function HabitCard({
+  habit,
+  onDelete,
+  onComplete,
+  isFading = false,
+  cardRef = null,
+}) {
   const router = useRouter();
   const days = useMemo(
     () => buildRecentDays(habit.completions || []),
@@ -34,7 +40,12 @@ export default function HabitCard({ habit, onDelete, onComplete }) {
 
   return (
     <div
-      className="relative space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition transform hover:scale-[1.02] active:scale-[0.99]"
+      ref={cardRef}
+      className={`relative space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transform ${
+        isFading
+          ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
+          : "opacity-100 transition transform hover:scale-[1.02] active:scale-[0.99]"
+      }`}
       onClick={handleCardClick}
     >
       <div className="flex items-start justify-between gap-3">
