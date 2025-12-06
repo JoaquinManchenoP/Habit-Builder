@@ -97,3 +97,29 @@ export function markHabitCompleted(id) {
   persistHabits(updated);
   return updated;
 }
+
+export function removeLastCompletion(id) {
+  const habits = readHabits();
+  const updated = habits.map((habit) => {
+    if (habit.id !== id) return habit;
+    if (!habit.completions || habit.completions.length === 0) return habit;
+
+    const latest = habit.completions.reduce((latestIso, currentIso) =>
+      latestIso && latestIso > currentIso ? latestIso : currentIso,
+    );
+
+    let removed = false;
+    const nextCompletions = habit.completions.filter((iso) => {
+      if (!removed && iso === latest) {
+        removed = true;
+        return false;
+      }
+      return true;
+    });
+
+    return { ...habit, completions: nextCompletions };
+  });
+
+  persistHabits(updated);
+  return updated;
+}

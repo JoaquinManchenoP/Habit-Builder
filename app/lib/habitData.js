@@ -32,6 +32,27 @@ export const markMockHabitCompleted = (id) => {
   );
 };
 
+export const removeMockHabitLastCompletion = (id) => {
+  return setSessionMockHabits(
+    getSessionMockHabits().map((habit) => {
+      if (habit.id !== id) return habit;
+      if (!habit.completions || habit.completions.length === 0) return habit;
+      const latest = habit.completions.reduce((latestIso, currentIso) =>
+        latestIso && latestIso > currentIso ? latestIso : currentIso,
+      );
+      let removed = false;
+      const completions = habit.completions.filter((iso) => {
+        if (!removed && iso === latest) {
+          removed = true;
+          return false;
+        }
+        return true;
+      });
+      return { ...habit, completions };
+    }),
+  );
+};
+
 export const loadHabitsWithMock = () => {
   const userHabits = getHabits().map((habit) => ({ ...habit, isMock: false }));
   const mockHabits = getSessionMockHabits().map((habit) => ({ ...habit, isMock: true }));

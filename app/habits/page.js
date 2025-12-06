@@ -5,12 +5,13 @@ import HabitCard from "../components/HabitCard";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import PageContainer from "../components/PageContainer";
-import { deleteHabit, markHabitCompleted } from "../lib/habits";
+import { deleteHabit, markHabitCompleted, removeLastCompletion } from "../lib/habits";
 import Link from "next/link";
 import {
   deleteMockHabit,
   loadHabitsWithMock,
   markMockHabitCompleted,
+  removeMockHabitLastCompletion,
 } from "../lib/habitData";
 
 export default function HabitsPage() {
@@ -40,14 +41,22 @@ export default function HabitsPage() {
     return () => window.removeEventListener("storage", hydrate);
   }, []);
 
-  const handleComplete = (id) => {
+  const handleComplete = (id, isChecked) => {
     const habit = habits.find((item) => item.id === id);
     if (!habit) return;
 
-    if (habit.isMock) {
-      markMockHabitCompleted(id);
+    if (isChecked) {
+      if (habit.isMock) {
+        markMockHabitCompleted(id);
+      } else {
+        markHabitCompleted(id);
+      }
     } else {
-      markHabitCompleted(id);
+      if (habit.isMock) {
+        removeMockHabitLastCompletion(id);
+      } else {
+        removeLastCompletion(id);
+      }
     }
 
     const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
@@ -155,14 +164,19 @@ export default function HabitsPage() {
                 Browse the habits stored on this device.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {usingMockData ? (
                 <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
                   Using mock testing data
                 </span>
               ) : null}
+              <span className="text-sm font-medium text-slate-800">
+                {habits.length} {habits.length === 1 ? "habit" : "habits"}
+              </span>
               <Link href="/habits/new">
-                <Button type="button">Add Habit</Button>
+                <Button type="button" className="h-9 w-9 p-0 text-lg font-bold">
+                  +
+                </Button>
               </Link>
             </div>
           </div>
@@ -172,12 +186,15 @@ export default function HabitsPage() {
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {habits.map((habit) => (
+              {[...habits]
+                .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
+                .map((habit) => (
                 <HabitCard
                   key={habit.id}
                   habit={habit}
                   onComplete={handleComplete}
                   onDelete={handleDeleteRequest}
+                  isCompletedToday={habit.completions?.includes(new Date().toISOString().slice(0, 10))}
                   isFading={fadeTargetId === habit.id}
                   cardRef={(node) => {
                     if (node) {
