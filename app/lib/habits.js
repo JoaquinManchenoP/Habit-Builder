@@ -75,10 +75,10 @@ export function deleteHabit(id) {
   return filtered;
 }
 
-export function markHabitCompleted(id) {
+export function markHabitCompleted(id, isoDateOverride = null) {
   const habits = readHabits();
   const today = new Date();
-  const isoDate = today.toISOString().slice(0, 10);
+  const isoDate = isoDateOverride || today.toISOString().slice(0, 10);
 
   const updated = habits.map((habit) => {
     if (habit.id !== id) return habit;

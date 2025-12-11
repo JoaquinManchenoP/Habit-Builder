@@ -18,15 +18,17 @@ const setSessionMockHabits = (nextHabits) => {
 export const deleteMockHabit = (id) =>
   setSessionMockHabits(getSessionMockHabits().filter((habit) => habit.id !== id));
 
-export const markMockHabitCompleted = (id) => {
+export const markMockHabitCompleted = (id, isoDateOverride = null) => {
   const today = new Date().toISOString().slice(0, 10);
+  const targetDate = isoDateOverride || today;
   return setSessionMockHabits(
     getSessionMockHabits().map((habit) => {
       if (habit.id !== id) return habit;
-      if (habit.completions.includes(today)) return habit;
+      if (habit.completions.includes(targetDate)) return habit;
       return {
         ...habit,
-        completions: [...habit.completions, today],
+        createdAt: habit.createdAt || targetDate,
+        completions: [...habit.completions, targetDate],
       };
     }),
   );
