@@ -41,15 +41,15 @@ export default function HabitsPage() {
     return () => window.removeEventListener("storage", hydrate);
   }, []);
 
-  const handleComplete = (id, isChecked) => {
+  const handleComplete = (id, isChecked, isoDateOverride = null) => {
     const habit = habits.find((item) => item.id === id);
     if (!habit) return;
 
     if (isChecked) {
       if (habit.isMock) {
-        markMockHabitCompleted(id);
+        markMockHabitCompleted(id, isoDateOverride);
       } else {
-        markHabitCompleted(id);
+        markHabitCompleted(id, isoDateOverride);
       }
     } else {
       if (habit.isMock) {
