@@ -61,3 +61,8 @@ export const loadHabitsWithMock = () => {
   const habits = applyColors([...userHabits, ...mockHabits]);
   return { habits, usingMockData: userHabits.length === 0 };
 };
+
+export const updateMockHabitName = (id, name) =>
+  setSessionMockHabits(
+    getSessionMockHabits().map((habit) => (habit.id === id ? { ...habit, name } : habit)),
+  );
