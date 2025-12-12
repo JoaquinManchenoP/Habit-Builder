@@ -123,3 +123,13 @@ export function removeLastCompletion(id) {
   persistHabits(updated);
   return updated;
 }
+
+export function updateHabitName(id, name) {
+  const habits = readHabits();
+  const updated = habits.map((habit) => {
+    if (habit.id !== id) return habit;
+    return { ...habit, name };
+  });
+  persistHabits(updated);
+  return updated;
+}
