@@ -6,17 +6,26 @@ export const calculateAvailableConsistency = (habit) => {
   const normalizedToday = new Date(
     Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
   );
-  const createdAtDate = habit.createdAt ? parseISODate(habit.createdAt) : normalizedToday;
-  const earliestCompletion = (habit.completions || []).reduce((earliest, iso) => {
-    const date = parseISODate(iso);
-    if (!earliest || date < earliest) return date;
-    return earliest;
-  }, null);
+  const createdAtDate = habit.createdAt
+    ? parseISODate(habit.createdAt)
+    : normalizedToday;
+  const earliestCompletion = (habit.completions || []).reduce(
+    (earliest, iso) => {
+      const date = parseISODate(iso);
+      if (!earliest || date < earliest) return date;
+      return earliest;
+    },
+    null
+  );
   const effectiveStart =
-    earliestCompletion && earliestCompletion < createdAtDate ? earliestCompletion : createdAtDate;
+    earliestCompletion && earliestCompletion < createdAtDate
+      ? earliestCompletion
+      : createdAtDate;
   if (normalizedToday < effectiveStart) return 0;
   const totalAvailableDays =
-    Math.floor((normalizedToday.getTime() - effectiveStart.getTime()) / 86_400_000) + 1;
+    Math.floor(
+      (normalizedToday.getTime() - effectiveStart.getTime()) / 86_400_000
+    ) + 1;
   const completedDays = (habit.completions || []).filter((iso) => {
     const date = parseISODate(iso);
     return date >= effectiveStart && date <= normalizedToday;
@@ -54,19 +63,31 @@ export const calculateStartedDaysAgo = (habit) => {
   const normalizedToday = new Date(
     Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
   );
-  const createdAtDate = habit.createdAt ? parseISODate(habit.createdAt) : normalizedToday;
-  const earliestCompletion = (habit.completions || []).reduce((earliest, iso) => {
-    const date = parseISODate(iso);
-    if (!earliest || date < earliest) return date;
-    return earliest;
-  }, null);
+  const createdAtDate = habit.createdAt
+    ? parseISODate(habit.createdAt)
+    : normalizedToday;
+  const earliestCompletion = (habit.completions || []).reduce(
+    (earliest, iso) => {
+      const date = parseISODate(iso);
+      if (!earliest || date < earliest) return date;
+      return earliest;
+    },
+    null
+  );
   const effectiveStart =
-    earliestCompletion && earliestCompletion < createdAtDate ? earliestCompletion : createdAtDate;
+    earliestCompletion && earliestCompletion < createdAtDate
+      ? earliestCompletion
+      : createdAtDate;
   const diff = normalizedToday.getTime() - effectiveStart.getTime();
   return Math.max(0, Math.floor(diff / 86_400_000));
 };
 
-export const buildMetrics = (habit, consistencyPercent, longestStreak, startedDaysAgo) => {
+export const buildMetrics = (
+  habit,
+  consistencyPercent,
+  longestStreak,
+  startedDaysAgo
+) => {
   const totalCheckIns = habit.completions?.length || 0;
   return [
     {
@@ -75,13 +96,13 @@ export const buildMetrics = (habit, consistencyPercent, longestStreak, startedDa
       subtitle: "of days",
     },
     {
-      title: "Longest streak",
+      title: "Streak",
       value: `${longestStreak}`,
       subtitle: `${longestStreak === 1 ? "day" : "days"}`,
     },
     { title: "Started", value: `${startedDaysAgo}`, subtitle: "days ago" },
     {
-      title: "Total check-ins",
+      title: "Check-ins",
       value: `${totalCheckIns}`,
       subtitle: "all time",
     },

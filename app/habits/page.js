@@ -186,25 +186,26 @@ export default function HabitsPage() {
               Start by creating a new habit.
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 justify-items-center sm:gap-4 md:[grid-template-columns:repeat(auto-fit,minmax(460px,1fr))] md:justify-items-center md:gap-5">
               {[...habits]
                 .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
                 .map((habit) => (
-                <HabitCard
-                  key={habit.id}
-                  habit={habit}
-                  onComplete={handleComplete}
-                  onDelete={handleDeleteRequest}
-                  isCompletedToday={habit.completions?.includes(new Date().toISOString().slice(0, 10))}
-                  isFading={fadeTargetId === habit.id}
-                  cardRef={(node) => {
-                    if (node) {
-                      cardRefs.current[habit.id] = node;
-                    } else {
-                      delete cardRefs.current[habit.id];
-                    }
-                  }}
-                />
+                <div key={habit.id} className="w-auto">
+                  <HabitCard
+                    habit={habit}
+                    onComplete={handleComplete}
+                    onDelete={handleDeleteRequest}
+                    isCompletedToday={habit.completions?.includes(new Date().toISOString().slice(0, 10))}
+                    isFading={fadeTargetId === habit.id}
+                    cardRef={(node) => {
+                      if (node) {
+                        cardRefs.current[habit.id] = node;
+                      } else {
+                        delete cardRefs.current[habit.id];
+                      }
+                    }}
+                  />
+                </div>
               ))}
             </div>
           )}

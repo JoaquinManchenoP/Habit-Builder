@@ -76,7 +76,8 @@ export default function HabitCard({
             cardRef.current = node;
           }
         }}
-        className={`group relative grid h-[370px] grid-rows-[2fr_4fr_4fr] rounded-2xl border border-slate-200 p-5 shadow-md transform origin-center transition ${
+        className={`group relative grid h-[370px] grid-rows-[2fr_4fr_4fr] rounded-2xl border border-slate-200 p-5 shadow-md transform origin-center transition
+          max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 ${
           isFading
             ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
             : "opacity-100 transform hover:scale-[1.02] active:scale-[0.99]"
