@@ -10,7 +10,7 @@ export default function CompletionToggle({ checked, onChange }) {
       }}
       className="grid h-9 w-9 place-items-center rounded-xl border border-slate-300 bg-white text-sm font-bold text-white transition
                appearance-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500
-               checked:border-green-600 checked:bg-green-600 checked:before:content-['✓']"
+               checked:border-green-600 checked:bg-green-600 checked:before:content-['✓'] max-[360px]:h-8 max-[360px]:w-8 max-[360px]:text-xs"
       aria-label="Mark habit completed"
     />
   );

@@ -1,25 +1,34 @@
-const MetricCard = ({ title, value, subtitle }) => (
-  <div className="flex flex-col items-center justify-center rounded-md border border-slate-300 bg-slate-50/70 p-3 text-center shadow-sm">
-    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+const MetricCard = ({ title, value, subtitle, showDivider }) => (
+  <div
+    className={`relative flex flex-col items-center justify-center py-3 px-4 text-center max-[360px]:py-2.5 max-[360px]:px-3 ${
+      showDivider
+        ? "before:absolute before:left-0 before:top-5 before:bottom-5 before:w-[1.5px] before:bg-slate-200"
+      : ""
+    }`}
+  >
+    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 max-[360px]:text-[10px]">
       {title}
     </p>
-    <p className="mt-1 text-2xl font-bold leading-tight text-slate-900">
+    <p className="mt-1 text-2xl font-bold leading-tight text-slate-900 max-[360px]:text-xl">
       {value}
     </p>
-    <p className="text-[11px] text-slate-600">{subtitle}</p>
+    <p className="text-[11px] text-slate-600 max-[360px]:text-[10px]">
+      {subtitle}
+    </p>
   </div>
 );
 
 export default function MetricsGrid({ metrics }) {
   return (
-    <div className="mt-4 flex items-center justify-center">
-      <div className="grid w-full grid-cols-4 gap-4">
-        {metrics.map((metric) => (
+    <div className="mt-4 flex items-center justify-center max-[360px]:mt-3">
+      <div className="grid w-full grid-cols-4 gap-3 max-[360px]:gap-3">
+        {metrics.map((metric, index) => (
           <MetricCard
             key={metric.title}
             title={metric.title}
             value={metric.value}
             subtitle={metric.subtitle}
+            showDivider={index % 4 !== 0}
           />
         ))}
       </div>
