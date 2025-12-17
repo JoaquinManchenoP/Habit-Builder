@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import HabitCard from "../components/HabitCard/HabitCard";
 import DeleteConfirmationModal from "../components/HabitCard/components/DeleteConfirmationModal";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import PageContainer from "../components/PageContainer";
-import { deleteHabit, markHabitCompleted, removeLastCompletion } from "../lib/habits";
+import HabitsList from "./Habit Page Components/HabitsList";
+import {
+  deleteHabit,
+  markHabitCompleted,
+  removeLastCompletion,
+} from "../lib/habits";
 import Link from "next/link";
 import {
   deleteMockHabit,
@@ -158,7 +162,7 @@ export default function HabitsPage() {
       <PageContainer>
         <Header />
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between ">
             <div className="space-y-1">
               <h1 className="text-2xl font-bold text-slate-900">Habits</h1>
               <p className="text-sm text-slate-600">
@@ -181,34 +185,13 @@ export default function HabitsPage() {
               </Link>
             </div>
           </div>
-          {habits.length === 0 ? (
-            <p className="rounded-md border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-600">
-              Start by creating a new habit.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 justify-items-center sm:gap-4 md:[grid-template-columns:repeat(auto-fit,minmax(460px,1fr))] md:justify-items-center md:gap-5">
-              {[...habits]
-                .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
-                .map((habit) => (
-                <div key={habit.id} className="w-auto">
-                  <HabitCard
-                    habit={habit}
-                    onComplete={handleComplete}
-                    onDelete={handleDeleteRequest}
-                    isCompletedToday={habit.completions?.includes(new Date().toISOString().slice(0, 10))}
-                    isFading={fadeTargetId === habit.id}
-                    cardRef={(node) => {
-                      if (node) {
-                        cardRefs.current[habit.id] = node;
-                      } else {
-                        delete cardRefs.current[habit.id];
-                      }
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <HabitsList
+            habits={habits}
+            onComplete={handleComplete}
+            onDeleteRequest={handleDeleteRequest}
+            fadeTargetId={fadeTargetId}
+            cardRefs={cardRefs}
+          />
         </section>
         <DeleteConfirmationModal
           isActive={isModalActive}
