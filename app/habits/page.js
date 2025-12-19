@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import HabitCard from "../components/HabitCard/HabitCard";
 import DeleteConfirmationModal from "../components/HabitCard/components/DeleteConfirmationModal";
-import Header from "../components/Header";
-import Button from "../components/Button";
-import PageContainer from "../components/PageContainer";
-import { deleteHabit, markHabitCompleted, removeLastCompletion } from "../lib/habits";
-import Link from "next/link";
+import HabitsList from "./Habit Page Components/HabitsList";
+import PageHeader from "./Habit Page Components/page-header/PageHeader";
+import {
+  deleteHabit,
+  markHabitCompleted,
+  removeLastCompletion,
+} from "../lib/habits";
 import {
   deleteMockHabit,
   loadHabitsWithMock,
@@ -154,70 +155,27 @@ export default function HabitsPage() {
   const pendingHabit = habits.find((habit) => habit.id === pendingDeleteId);
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <PageContainer>
-        <Header />
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-slate-900">Habits</h1>
-              <p className="text-sm text-slate-600">
-                Browse the habits stored on this device.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              {usingMockData ? (
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-                  Using mock testing data
-                </span>
-              ) : null}
-              <span className="text-sm font-medium text-slate-800">
-                {habits.length} {habits.length === 1 ? "habit" : "habits"}
-              </span>
-              <Link href="/habits/new">
-                <Button type="button" className="h-9 w-9 p-0 text-lg font-bold">
-                  +
-                </Button>
-              </Link>
-            </div>
-          </div>
-          {habits.length === 0 ? (
-            <p className="rounded-md border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-600">
-              Start by creating a new habit.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 justify-items-center sm:gap-4 md:[grid-template-columns:repeat(auto-fit,minmax(460px,1fr))] md:justify-items-center md:gap-5">
-              {[...habits]
-                .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
-                .map((habit) => (
-                <div key={habit.id} className="w-auto">
-                  <HabitCard
-                    habit={habit}
-                    onComplete={handleComplete}
-                    onDelete={handleDeleteRequest}
-                    isCompletedToday={habit.completions?.includes(new Date().toISOString().slice(0, 10))}
-                    isFading={fadeTargetId === habit.id}
-                    cardRef={(node) => {
-                      if (node) {
-                        cardRefs.current[habit.id] = node;
-                      } else {
-                        delete cardRefs.current[habit.id];
-                      }
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-        <DeleteConfirmationModal
-          isActive={isModalActive}
-          isVisible={isModalVisible}
-          habitName={pendingHabit?.name}
-          onCancel={handleCancelDelete}
-          onConfirm={handleConfirmDelete}
+    <>
+      <section className="space-y-4">
+        <PageHeader
+          habitsCount={habits.length}
+          usingMockData={usingMockData}
         />
-      </PageContainer>
-    </main>
+        <HabitsList
+          habits={habits}
+          onComplete={handleComplete}
+          onDeleteRequest={handleDeleteRequest}
+          fadeTargetId={fadeTargetId}
+          cardRefs={cardRefs}
+        />
+      </section>
+      <DeleteConfirmationModal
+        isActive={isModalActive}
+        isVisible={isModalVisible}
+        habitName={pendingHabit?.name}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
+    </>
   );
 }

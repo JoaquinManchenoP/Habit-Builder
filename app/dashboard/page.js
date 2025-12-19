@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Header from "../components/Header";
-import PageContainer from "../components/PageContainer";
 import { buildWeeklyPercentages } from "../lib/analytics";
 import { loadHabitsWithMock } from "../lib/habitData";
 
@@ -315,53 +313,49 @@ export default function DashboardPage() {
   );
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <PageContainer>
-        <Header />
-
-        <section className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                Weekly completion
-              </h1>
-              <p className="text-sm text-slate-600">
-                One point per habit per week: completed days divided by active
-                days, capped at 100%.
-              </p>
-            </div>
-            {usingMockData ? (
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-                Using mock testing data
-              </span>
-            ) : null}
+    <div className="space-y-6">
+      <section className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Weekly completion
+            </h1>
+            <p className="text-sm text-slate-600">
+              One point per habit per week: completed days divided by active
+              days, capped at 100%.
+            </p>
           </div>
-        </section>
+          {usingMockData ? (
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+              Using mock testing data
+            </span>
+          ) : null}
+        </div>
+      </section>
 
-        <MultiLineChart weeks={weeks} series={series} />
+      <MultiLineChart weeks={weeks} series={series} />
 
-        {series.length ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-800">Legend</h2>
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              {series.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 text-sm">
-                  <span
-                    className="h-3 w-8 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <div>
-                    <p className="font-medium text-slate-900">{item.name}</p>
-                    <p className="text-xs text-slate-600">
-                      {`Data points: ${item.points.filter((p) => p.value !== null).length} weeks`}
-                    </p>
-                  </div>
+      {series.length ? (
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="text-base font-semibold text-slate-800">Legend</h2>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            {series.map((item) => (
+              <div key={item.id} className="flex items-center gap-3 text-sm">
+                <span
+                  className="h-3 w-8 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <div>
+                  <p className="font-medium text-slate-900">{item.name}</p>
+                  <p className="text-xs text-slate-600">
+                    {`Data points: ${item.points.filter((p) => p.value !== null).length} weeks`}
+                  </p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        ) : null}
-      </PageContainer>
-    </main>
+        </div>
+      ) : null}
+    </div>
   );
 }
