@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
-import { updateHabitName } from "../../../lib/habits";
-import { updateMockHabitName } from "../../../lib/habitData";
+import { updateHabitDetails } from "../../../lib/habits";
+import { updateMockHabitDetails } from "../../../lib/habitData";
 
 export const useHabitActions = ({
   habit,
@@ -12,12 +12,13 @@ export const useHabitActions = ({
   openEditModal,
   closeEditModal,
   onEditNameChange,
+  onEditActiveDaysChange,
 }) => {
   const router = useRouter();
 
   const handleEdit = () => {
     closeMenu();
-    openEditModal?.(habit.name);
+    openEditModal?.(habit.name, habit.activeDays);
   };
 
   const handleDelete = () => {
@@ -36,21 +37,29 @@ export const useHabitActions = ({
     openBackfillModal();
   };
 
-  const handleSaveEdit = (nextName) => {
+  const handleSaveEdit = (nextName, nextActiveDays) => {
     if (!nextName) {
       closeEditModal?.();
       return;
     }
+    const resolvedActiveDays = nextActiveDays || habit.activeDays;
     if (habit.isMock) {
-      updateMockHabitName(habit.id, nextName);
+      updateMockHabitDetails(habit.id, {
+        name: nextName,
+        activeDays: resolvedActiveDays,
+      });
     } else {
-      updateHabitName(habit.id, nextName);
+      updateHabitDetails(habit.id, {
+        name: nextName,
+        activeDays: resolvedActiveDays,
+      });
     }
     // Notify listeners (Habits page) to rehydrate
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("storage"));
     }
     onEditNameChange?.(nextName);
+    onEditActiveDaysChange?.(resolvedActiveDays);
     closeEditModal?.();
   };
 

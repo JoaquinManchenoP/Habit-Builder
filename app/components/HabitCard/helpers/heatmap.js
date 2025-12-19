@@ -1,11 +1,18 @@
+import { parseISODate } from "../../../lib/analytics";
+import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
+
 const DAYS_TO_SHOW = 120;
 
-export const buildRecentDays = (completions = []) => {
+export const buildRecentDays = (completions = [], activeDays, createdAt) => {
   const today = new Date();
+  const normalizedActiveDays = normalizeActiveDays(activeDays);
+  const createdAtDate = createdAt ? parseISODate(createdAt) : null;
   return Array.from({ length: DAYS_TO_SHOW }, (_, index) => {
     const date = new Date();
     date.setDate(today.getDate() - (DAYS_TO_SHOW - 1 - index));
     const iso = date.toISOString().slice(0, 10);
+    const isBeforeStart = createdAtDate ? date < createdAtDate : false;
+    const isOffDay = !isBeforeStart && !isActiveDay(date, normalizedActiveDays);
 
     return {
       iso,
@@ -14,6 +21,7 @@ export const buildRecentDays = (completions = []) => {
         day: "numeric",
       }),
       completed: completions.includes(iso),
+      isOffDay,
     };
   });
 };

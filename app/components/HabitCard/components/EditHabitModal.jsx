@@ -1,8 +1,12 @@
+import { WEEKDAY_LABELS, WEEKDAY_ORDER } from "../../../lib/habitSchedule";
+
 export default function EditHabitModal({
   open,
   visible,
   nameValue,
+  activeDaysValue,
   onChangeName,
+  onChangeActiveDay,
   onSave,
   onClose,
 }) {
@@ -39,6 +43,22 @@ export default function EditHabitModal({
                 className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
               />
             </label>
+            <div className="flex items-start justify-between gap-2">
+              {WEEKDAY_ORDER.map((dayKey) => (
+                <label
+                  key={dayKey}
+                  className="flex flex-col items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-600"
+                >
+                  <input
+                    type="checkbox"
+                    checked={activeDaysValue?.[dayKey]}
+                    onChange={(event) => onChangeActiveDay(dayKey, event.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-2 focus:ring-slate-300"
+                  />
+                  <span>{WEEKDAY_LABELS[dayKey]}</span>
+                </label>
+              ))}
+            </div>
           </div>
           <div className="flex justify-end gap-3">
             <button
@@ -51,7 +71,7 @@ export default function EditHabitModal({
             <button
               type="button"
               className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500"
-              onClick={() => onSave(nameValue)}
+              onClick={() => onSave(nameValue, activeDaysValue)}
             >
               Save
             </button>

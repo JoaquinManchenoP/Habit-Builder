@@ -105,7 +105,7 @@ export default function Navbar() {
   return (
     <>
       <header className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:hidden">
-        <Link href="/dashboard" className="text-lg font-bold text-indigo-700">
+        <Link href="/habits" className="text-lg font-bold text-indigo-700">
           Habit Builder
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium text-slate-700">
@@ -117,7 +117,7 @@ export default function Navbar() {
         </nav>
       </header>
       <aside className="hidden w-56 shrink-0 flex-col gap-6 md:flex">
-        <Link href="/dashboard" className="flex items-center gap-3 text-sm font-semibold text-slate-800">
+        <Link href="/habits" className="flex items-center gap-3 text-sm font-semibold text-slate-800">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
             <span className="text-base font-bold text-slate-800">HB</span>
           </span>
