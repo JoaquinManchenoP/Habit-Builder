@@ -8,11 +8,14 @@ import {
 } from "../helpers/metrics";
 
 export const useHabitMetrics = (habit) => {
-  const days = useMemo(() => buildRecentDays(habit.completions || []), [habit.completions]);
+  const days = useMemo(
+    () => buildRecentDays(habit.completions || [], habit.activeDays, habit.createdAt),
+    [habit.completions, habit.activeDays, habit.createdAt]
+  );
   const consistencyPercent = useMemo(() => calculateAvailableConsistency(habit), [habit]);
   const longestStreak = useMemo(
-    () => calculateLongestStreak(habit.completions || []),
-    [habit.completions]
+    () => calculateLongestStreak(habit),
+    [habit]
   );
   const startedDaysAgo = useMemo(() => calculateStartedDaysAgo(habit), [habit]);
   const metrics = useMemo(

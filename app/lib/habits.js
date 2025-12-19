@@ -1,3 +1,5 @@
+import { DEFAULT_ACTIVE_DAYS, normalizeActiveDays } from "./habitSchedule";
+
 const STORAGE_KEY = "habits";
 
 const safeParse = (value) => {
@@ -27,6 +29,7 @@ const normalizeHabit = (habit) => {
     createdAt,
     completions,
     isMock: Boolean(habit.isMock),
+    activeDays: normalizeActiveDays(habit.activeDays),
   };
 };
 
@@ -51,7 +54,7 @@ export function getHabits() {
   return readHabits();
 }
 
-export function createHabit(name) {
+export function createHabit(name, activeDays = DEFAULT_ACTIVE_DAYS) {
   const habits = readHabits();
   const newHabit = {
     id:
@@ -62,6 +65,7 @@ export function createHabit(name) {
     createdAt: new Date().toISOString().slice(0, 10),
     completions: [],
     isMock: false,
+    activeDays: normalizeActiveDays(activeDays),
   };
   const updated = [...habits, newHabit];
   persistHabits(updated);
@@ -124,12 +128,22 @@ export function removeLastCompletion(id) {
   return updated;
 }
 
-export function updateHabitName(id, name) {
+export function updateHabitDetails(id, updates = {}) {
   const habits = readHabits();
   const updated = habits.map((habit) => {
     if (habit.id !== id) return habit;
-    return { ...habit, name };
+    return {
+      ...habit,
+      ...updates,
+      activeDays: normalizeActiveDays(
+        updates.activeDays ? updates.activeDays : habit.activeDays
+      ),
+    };
   });
   persistHabits(updated);
   return updated;
+}
+
+export function updateHabitName(id, name) {
+  return updateHabitDetails(id, { name });
 }

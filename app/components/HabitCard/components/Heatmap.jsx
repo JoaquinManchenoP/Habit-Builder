@@ -1,16 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import MonthLabels from "./MonthLabels";
+import { parseISODate } from "../../../lib/analytics";
+import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
 
 const CELL_SIZE = 17; // px
 const GAP_SIZE = 7; // px between columns
 const PADDING_BUFFER = 4; // px total horizontal padding in the container
 const MAX_COLUMNS_CAP = 32; // safety guard to avoid runaway growth
 const SINGLE_COLUMN_QUERY = "(max-width: 1024px)";
+const OFF_DAY_COLOR = "#6b7280";
 
-export default function Heatmap({ days, color }) {
+export default function Heatmap({ days, color, activeDays, createdAt }) {
   const containerRef = useRef(null);
   const [availableWidth, setAvailableWidth] = useState(null);
   const [isSingleColumn, setIsSingleColumn] = useState(false);
+  const [hoveredDay, setHoveredDay] = useState(null);
+  const hoverTimeoutRef = useRef(null);
+  const normalizedActiveDays = useMemo(
+    () => normalizeActiveDays(activeDays),
+    [activeDays]
+  );
+  const createdAtDate = useMemo(
+    () => (createdAt ? parseISODate(createdAt) : null),
+    [createdAt]
+  );
 
   useEffect(() => {
     const mq = window.matchMedia(SINGLE_COLUMN_QUERY);
@@ -37,6 +50,37 @@ export default function Heatmap({ days, color }) {
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const formatHoverDate = (iso) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+  const handleEnter = (day) => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredDay(day);
+    }, 2500);
+  };
+
+  const handleLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoveredDay(null);
+  };
 
   const displayDays = useMemo(() => {
     if (!isSingleColumn || !availableWidth) return days;
@@ -72,12 +116,15 @@ export default function Heatmap({ days, color }) {
             day: "numeric",
           }),
           completed: completionMap.has(iso),
+          isOffDay:
+            !(createdAtDate && date < createdAtDate) &&
+            !isActiveDay(date, normalizedActiveDays),
         }
       );
     });
 
     return extended;
-  }, [availableWidth, days, isSingleColumn]);
+  }, [availableWidth, createdAtDate, days, isSingleColumn, normalizedActiveDays]);
 
   return (
     <div
@@ -89,14 +136,27 @@ export default function Heatmap({ days, color }) {
         {displayDays.map((day) => (
           <div
             key={day.iso}
-            className="h-[17px] w-[17px] rounded-sm border border-slate-200 max-[360px]:h-[15px] max-[360px]:w-[15px]"
-            style={{
-              backgroundColor: day.completed
-                ? color || "#10b981"
-                : "rgba(148, 163, 184, 0.25)",
-            }}
-            title={`${day.label} - ${day.completed ? "Completed" : "Empty"}`}
-          />
+            className="relative"
+            onMouseEnter={() => handleEnter(day)}
+            onMouseLeave={handleLeave}
+          >
+            <div
+              className="h-[17px] w-[17px] rounded-sm border border-slate-200 max-[360px]:h-[15px] max-[360px]:w-[15px]"
+              style={{
+                backgroundColor: day.completed
+                  ? color || "#10b981"
+                  : day.isOffDay
+                    ? OFF_DAY_COLOR
+                    : "rgba(148, 163, 184, 0.25)",
+              }}
+              title={formatHoverDate(day.iso)}
+            />
+            {hoveredDay?.iso === day.iso ? (
+              <div className="pointer-events-none absolute left-1/2 top-[-26px] z-10 -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-md">
+                {formatHoverDate(day.iso)}
+              </div>
+            ) : null}
+          </div>
         ))}
       </div>
     </div>

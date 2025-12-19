@@ -42,6 +42,8 @@ export default function HabitCard({
     isVisible: isEditVisible,
     editName,
     setEditName,
+    editActiveDays,
+    setEditActiveDays,
     openEditModal,
     closeEditModal,
   } = useHabitEditModal();
@@ -63,6 +65,7 @@ export default function HabitCard({
     openEditModal,
     closeEditModal,
     onEditNameChange: setEditName,
+    onEditActiveDaysChange: setEditActiveDays,
   });
 
   return (
@@ -99,7 +102,12 @@ export default function HabitCard({
             }}
           />
           <MetricsGrid metrics={metrics} />
-          <Heatmap days={days} color={habit.color} />
+          <Heatmap
+            days={days}
+            color={habit.color}
+            activeDays={habit.activeDays}
+            createdAt={habit.createdAt}
+          />
         </div>
         {isCompletedToday ? <CompletionOverlay /> : null}
         <CardMenu
@@ -124,7 +132,11 @@ export default function HabitCard({
         open={isEditOpen}
         visible={isEditVisible}
         nameValue={editName}
+        activeDaysValue={editActiveDays}
         onChangeName={setEditName}
+        onChangeActiveDay={(dayKey, nextValue) =>
+          setEditActiveDays((prev) => ({ ...prev, [dayKey]: nextValue }))
+        }
         onSave={handleSaveEdit}
         onClose={closeEditModal}
       />

@@ -1,5 +1,6 @@
 import { getHabits } from "./habits";
 import { applyColors, buildMockHabits } from "./analytics";
+import { normalizeActiveDays } from "./habitSchedule";
 
 let sessionMockHabits = null;
 
@@ -65,4 +66,19 @@ export const loadHabitsWithMock = () => {
 export const updateMockHabitName = (id, name) =>
   setSessionMockHabits(
     getSessionMockHabits().map((habit) => (habit.id === id ? { ...habit, name } : habit)),
+  );
+
+export const updateMockHabitDetails = (id, updates = {}) =>
+  setSessionMockHabits(
+    getSessionMockHabits().map((habit) =>
+      habit.id === id
+        ? {
+            ...habit,
+            ...updates,
+            activeDays: normalizeActiveDays(
+              updates.activeDays ? updates.activeDays : habit.activeDays,
+            ),
+          }
+        : habit,
+    ),
   );

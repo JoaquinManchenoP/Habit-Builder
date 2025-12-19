@@ -1,3 +1,5 @@
+import { DEFAULT_ACTIVE_DAYS, isActiveDay, normalizeActiveDays } from "./habitSchedule";
+
 const COLORS = [
   "#2563eb",
   "#ef4444",
@@ -62,6 +64,11 @@ const buildMockHabits = (today = new Date()) => {
       name: "Morning Run",
       createdAt: iso(-45),
       isMock: true,
+      activeDays: {
+        ...DEFAULT_ACTIVE_DAYS,
+        sat: false,
+        sun: false,
+      },
       completions: [
         iso(-45),
         iso(-43),
@@ -101,6 +108,10 @@ const buildMockHabits = (today = new Date()) => {
       name: "Read 20 Pages",
       createdAt: iso(-35),
       isMock: true,
+      activeDays: {
+        ...DEFAULT_ACTIVE_DAYS,
+        wed: false,
+      },
       completions: [
         iso(-35),
         iso(-33),
@@ -135,6 +146,11 @@ const buildMockHabits = (today = new Date()) => {
       name: "Meditate",
       createdAt: iso(-32),
       isMock: true,
+      activeDays: {
+        ...DEFAULT_ACTIVE_DAYS,
+        mon: false,
+        thu: false,
+      },
       completions: [
         iso(-32),
         iso(-30),
@@ -168,6 +184,11 @@ const buildMockHabits = (today = new Date()) => {
       name: "Strength Training",
       createdAt: iso(-40),
       isMock: true,
+      activeDays: {
+        ...DEFAULT_ACTIVE_DAYS,
+        tue: false,
+        fri: false,
+      },
       completions: [
         iso(-40),
         iso(-38),
@@ -207,6 +228,7 @@ const applyColors = (habits) =>
   habits.map((habit, index) => ({
     ...habit,
     color: habit.color || COLORS[index % COLORS.length],
+    activeDays: normalizeActiveDays(habit.activeDays),
   }));
 
 const buildWeeklyPercentages = (habits) => {
@@ -225,12 +247,18 @@ const buildWeeklyPercentages = (habits) => {
       ? parseISODate(habit.createdAt)
       : completionDates[0] || normalizedToday;
     const latestCompletion = completionDates[completionDates.length - 1];
+    const completionSet = new Set(
+      completionDates.map((date) => toISODate(date)),
+    );
+    const activeDays = normalizeActiveDays(habit.activeDays);
 
     return {
       ...habit,
       color: habit.color || COLORS[index % COLORS.length],
+      activeDays,
       createdAt,
       completionDates,
+      completionSet,
       latestDate:
         latestCompletion && latestCompletion > normalizedToday
           ? latestCompletion
@@ -273,7 +301,19 @@ const buildWeeklyPercentages = (habits) => {
       }
 
       const activeStart = week.start < habit.createdAt ? habit.createdAt : week.start;
-      const totalActiveDays = daysBetweenInclusive(activeStart, activeEnd);
+      const totalActiveDays = (() => {
+        if (activeEnd < activeStart) return 0;
+        let count = 0;
+        let pointer = new Date(activeStart);
+        while (pointer <= activeEnd) {
+          const completed = habit.completionSet.has(toISODate(pointer));
+          if (isActiveDay(pointer, habit.activeDays) || completed) {
+            count += 1;
+          }
+          pointer = addDays(pointer, 1);
+        }
+        return count;
+      })();
 
       if (totalActiveDays <= 0) {
         return { ...week, value: null };
