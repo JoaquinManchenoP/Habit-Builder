@@ -1,149 +1,42 @@
-import { DEFAULT_ACTIVE_DAYS, normalizeActiveDays } from "./habitSchedule";
-
-const STORAGE_KEY = "habits";
-
-const safeParse = (value) => {
-  try {
-    return JSON.parse(value);
-  } catch (error) {
-    console.error("Failed to parse habits from storage", error);
-    return [];
-  }
-};
-
-const getStorage = () => {
-  if (typeof window === "undefined") return null;
-  return window.localStorage;
-};
-
-const normalizeHabit = (habit) => {
-  const completions = Array.isArray(habit.completions) ? habit.completions : [];
-  // Default the creation date to the earliest completion or today so
-  // downstream features can reason about when the habit became active.
-  const createdAt =
-    habit.createdAt ||
-    (completions.length ? completions[0] : new Date().toISOString().slice(0, 10));
-
-  return {
-    ...habit,
-    createdAt,
-    completions,
-    isMock: Boolean(habit.isMock),
-    activeDays: normalizeActiveDays(habit.activeDays),
-  };
-};
-
-const readHabits = () => {
-  const storage = getStorage();
-  if (!storage) return [];
-  const storedValue = storage.getItem(STORAGE_KEY);
-  if (!storedValue) return [];
-  const parsed = safeParse(storedValue);
-  const habits = Array.isArray(parsed) ? parsed : [];
-  return habits.map(normalizeHabit);
-};
-
-const persistHabits = (habits) => {
-  const storage = getStorage();
-  if (!storage) return;
-  const userHabits = habits.filter((habit) => !habit.isMock);
-  storage.setItem(STORAGE_KEY, JSON.stringify(userHabits));
-};
+import {
+  addCheckIn,
+  createHabit as createHabitRecord,
+  deleteHabit as deleteHabitRecord,
+  getDefaultUserId,
+  getHabitsByUserId,
+  removeLastCompletion as removeLastCompletionRecord,
+  updateHabit as updateHabitRecord,
+} from "./mockDb";
+import { DEFAULT_ACTIVE_DAYS } from "./habitSchedule";
 
 export function getHabits() {
-  return readHabits();
+  return getHabitsByUserId(getDefaultUserId());
 }
 
-export function createHabit(name, activeDays = DEFAULT_ACTIVE_DAYS) {
-  const habits = readHabits();
-  const newHabit = {
-    id:
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : Date.now().toString(),
-    name,
-    createdAt: new Date().toISOString().slice(0, 10),
-    completions: [],
-    isMock: false,
-    activeDays: normalizeActiveDays(activeDays),
-  };
-  const updated = [...habits, newHabit];
-  persistHabits(updated);
-  return newHabit;
+export function createHabit(
+  name,
+  activeDays = DEFAULT_ACTIVE_DAYS,
+  goalType = "daily"
+) {
+  return createHabitRecord(getDefaultUserId(), { name, activeDays, goalType });
 }
 
 export function deleteHabit(id) {
-  const habits = readHabits();
-  const filtered = habits.filter((habit) => habit.id !== id);
-  persistHabits(filtered);
-  return filtered;
+  return deleteHabitRecord(id);
 }
 
 export function markHabitCompleted(id, isoDateOverride = null) {
-  const habits = readHabits();
-  const today = new Date();
-  const isoDate = isoDateOverride || today.toISOString().slice(0, 10);
-
-  const updated = habits.map((habit) => {
-    if (habit.id !== id) return habit;
-
-    if (habit.completions.includes(isoDate)) {
-      return habit;
-    }
-
-    return {
-      ...habit,
-      createdAt: habit.createdAt || isoDate,
-      completions: [...habit.completions, isoDate],
-    };
-  });
-
-  persistHabits(updated);
-  return updated;
+  return addCheckIn(id, isoDateOverride);
 }
 
 export function removeLastCompletion(id) {
-  const habits = readHabits();
-  const updated = habits.map((habit) => {
-    if (habit.id !== id) return habit;
-    if (!habit.completions || habit.completions.length === 0) return habit;
-
-    const latest = habit.completions.reduce((latestIso, currentIso) =>
-      latestIso && latestIso > currentIso ? latestIso : currentIso,
-    );
-
-    let removed = false;
-    const nextCompletions = habit.completions.filter((iso) => {
-      if (!removed && iso === latest) {
-        removed = true;
-        return false;
-      }
-      return true;
-    });
-
-    return { ...habit, completions: nextCompletions };
-  });
-
-  persistHabits(updated);
-  return updated;
+  return removeLastCompletionRecord(id);
 }
 
 export function updateHabitDetails(id, updates = {}) {
-  const habits = readHabits();
-  const updated = habits.map((habit) => {
-    if (habit.id !== id) return habit;
-    return {
-      ...habit,
-      ...updates,
-      activeDays: normalizeActiveDays(
-        updates.activeDays ? updates.activeDays : habit.activeDays
-      ),
-    };
-  });
-  persistHabits(updated);
-  return updated;
+  return updateHabitRecord(id, updates);
 }
 
 export function updateHabitName(id, name) {
-  return updateHabitDetails(id, { name });
+  return updateHabitRecord(id, { name });
 }

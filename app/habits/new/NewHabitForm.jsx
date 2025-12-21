@@ -12,6 +12,7 @@ import {
 
 export default function NewHabitForm() {
   const [name, setName] = useState("");
+  const [goalType, setGoalType] = useState("daily");
   const [activeDays, setActiveDays] = useState({ ...DEFAULT_ACTIVE_DAYS });
   const [statusMessage, setStatusMessage] = useState("");
   const [statusTone, setStatusTone] = useState("muted");
@@ -43,7 +44,7 @@ export default function NewHabitForm() {
       return;
     }
 
-    createHabit(trimmedName, activeDays);
+    createHabit(trimmedName, goalType === "daily" ? activeDays : undefined, goalType);
     setStatusMessage("Habit saved locally.");
     setStatusTone("success");
     setName("");
@@ -55,6 +56,33 @@ export default function NewHabitForm() {
       onSubmit={handleSubmit}
       className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm w-2/3"
     >
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+          Goal type
+        </p>
+        <div className="flex gap-2 rounded-2xl bg-slate-100 p-1">
+          {[
+            { value: "daily", label: "Daily goal" },
+            { value: "weekly", label: "Weekly goal" },
+          ].map((option) => {
+            const isSelected = goalType === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setGoalType(option.value)}
+                className={`flex-1 rounded-2xl px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
+                  isSelected
+                    ? "bg-[color:var(--app-accent)] text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <label className="block space-y-2 text-sm font-medium text-slate-700">
         <span>Create a new habit</span>
         <input
@@ -71,27 +99,29 @@ export default function NewHabitForm() {
           </span>
         ) : null}
       </label>
-      <div className="flex items-start gap-12 pt-3 justify-center">
-        {WEEKDAY_ORDER.map((dayKey) => (
-          <label
-            key={dayKey}
-            className="flex flex-col items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-600"
-          >
-            <input
-              type="checkbox"
-              checked={activeDays[dayKey]}
-              onChange={(event) =>
-                setActiveDays((prev) => ({
-                  ...prev,
-                  [dayKey]: event.target.checked,
-                }))
-              }
-              className="grid h-8 w-8 place-items-center rounded-lg border border-slate-300 bg-white text-[11px] font-bold text-white transition appearance-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 checked:border-indigo-600 checked:bg-indigo-600 checked:before:content-['✓']"
-            />
-            <span>{WEEKDAY_LABELS[dayKey]}</span>
-          </label>
-        ))}
-      </div>
+      {goalType === "daily" ? (
+        <div className="flex items-start gap-12 pt-3 justify-center">
+          {WEEKDAY_ORDER.map((dayKey) => (
+            <label
+              key={dayKey}
+              className="flex flex-col items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-600"
+            >
+              <input
+                type="checkbox"
+                checked={activeDays[dayKey]}
+                onChange={(event) =>
+                  setActiveDays((prev) => ({
+                    ...prev,
+                    [dayKey]: event.target.checked,
+                  }))
+                }
+                className="grid h-8 w-8 place-items-center rounded-lg border border-slate-300 bg-white text-[11px] font-bold text-white transition appearance-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 checked:border-indigo-600 checked:bg-indigo-600 checked:before:content-['✓']"
+              />
+              <span>{WEEKDAY_LABELS[dayKey]}</span>
+            </label>
+          ))}
+        </div>
+      ) : null}
       <div className="flex items-center gap-3">
         <Button
           type="submit"

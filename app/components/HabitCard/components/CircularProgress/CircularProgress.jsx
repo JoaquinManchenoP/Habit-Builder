@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 const FALLBACK_GRADIENT = { start: "#a855f7", end: "#38bdf8" };
