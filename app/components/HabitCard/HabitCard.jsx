@@ -24,7 +24,7 @@ export default function HabitCard({
 }) {
   const internalRef = useRef(null);
 
-  const { days, metrics } = useHabitMetrics(habit);
+  const { days, metrics, consistencyPercent } = useHabitMetrics(habit);
   const { menu, openMenu, closeMenu } = useHabitMenu(internalRef);
   const {
     isOpen: isBackfillOpen,
@@ -79,16 +79,18 @@ export default function HabitCard({
             cardRef.current = node;
           }
         }}
-        className={`group relative grid h-[370px] grid-rows-[2fr_4fr_4fr] rounded-2xl border border-slate-200 p-5 shadow-md transform origin-center transition
-          max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 ${
-          isFading
-            ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
-            : "opacity-100 transform hover:scale-[1.02] active:scale-[0.99]"
+        className={`group relative grid h-[370px] grid-rows-[2fr_4fr_4fr] rounded-2xl border border-slate-200 bg-white p-5 shadow-md transform origin-center transition
+          max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5 ${
+            isFading
+              ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
+            : "opacity-100 transform hover:scale-[1.01] active:scale-[0.99]"
         }`}
       >
         <div
-          className={` pt-3 relative flex h-full w-full flex-col origin-center transition-transform ${
-            isCompletedToday ? "scale-[0.97] group-hover:scale-100" : "scale-100"
+          className={` pt-2 relative flex h-full w-full flex-col origin-center transition-transform ${
+            isCompletedToday
+              ? "scale-[0.97] group-hover:scale-100"
+              : "scale-100"
           }`}
         >
           <CardHeader
@@ -101,13 +103,21 @@ export default function HabitCard({
               openMenu(event);
             }}
           />
-          <MetricsGrid metrics={metrics} />
-          <Heatmap
-            days={days}
-            color={habit.color}
-            activeDays={habit.activeDays}
-            createdAt={habit.createdAt}
-          />
+          <div className="mt-0">
+            <MetricsGrid
+              metrics={metrics}
+              consistencyPercent={consistencyPercent}
+              color={habit.color}
+            />
+          </div>
+          <div className="mt-0">
+            <Heatmap
+              days={days}
+              color={habit.color}
+              activeDays={habit.activeDays}
+              createdAt={habit.createdAt}
+            />
+          </div>
         </div>
         {isCompletedToday ? <CompletionOverlay /> : null}
         <CardMenu

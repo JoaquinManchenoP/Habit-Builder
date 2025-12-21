@@ -1,18 +1,6 @@
-import { IBM_Plex_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/navigation/Navbar";
 import PageContainer from "./components/PageContainer";
-
-const ibmPlexSans = IBM_Plex_Sans({
-  variable: "--font-ibm-plex-sans",
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata = {
   title: "Create Next App",
@@ -23,11 +11,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${ibmPlexSans.variable} ${geistMono.variable} antialiased overflow-y-scroll`}
+        className="antialiased overflow-y-scroll"
       >
         <main className="min-h-screen bg-slate-50">
           <PageContainer>
-            <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
               <Navbar />
               <div className="min-w-0 w-full flex-1">{children}</div>
             </div>

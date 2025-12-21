@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "GT Walsheim Pro";
+  src: url("/fonts/GT-Walsheim-Pro-Regular.woff2") format("woff2"),
+    url("/fonts/GT-Walsheim-Pro-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Walsheim Pro";
+  src: url("/fonts/GT-Walsheim-Pro-Medium.woff2") format("woff2"),
+    url("/fonts/GT-Walsheim-Pro-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Walsheim Pro";
+  src: url("/fonts/GT-Walsheim-Pro-SemiBold.woff2") format("woff2"),
+    url("/fonts/GT-Walsheim-Pro-SemiBold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Walsheim Pro";
+  src: url("/fonts/GT-Walsheim-Pro-Bold.woff2") format("woff2"),
+    url("/fonts/GT-Walsheim-Pro-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --app-bg: #fbfbfb;
+  --app-surface: #ffffff;
+  --app-text: #33494e;
+  --app-accent: #ffcd1f;
+  --app-border: rgba(51, 73, 78, 0.12);
+  --app-text-muted: rgba(51, 73, 78, 0.7);
+
+  --shadow-sm: 0 6px 16px rgba(51, 73, 78, 0.08);
+  --shadow-md: 0 16px 32px rgba(51, 73, 78, 0.12);
+  --shadow-lg: 0 24px 48px rgba(51, 73, 78, 0.16);
+  --shadow-xl: 0 32px 64px rgba(51, 73, 78, 0.18);
+  --shadow-2xl: 0 40px 80px rgba(51, 73, 78, 0.2);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-ibm-plex-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-background: var(--app-bg);
+  --color-foreground: var(--app-text);
+  --font-sans: "GT Walsheim Pro";
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-white: var(--app-surface);
+  --color-black: var(--app-text);
+
+  --color-slate-50: var(--app-bg);
+  --color-slate-100: rgba(51, 73, 78, 0.04);
+  --color-slate-200: rgba(51, 73, 78, 0.08);
+  --color-slate-300: rgba(51, 73, 78, 0.16);
+  --color-slate-400: rgba(51, 73, 78, 0.32);
+  --color-slate-500: rgba(51, 73, 78, 0.55);
+  --color-slate-600: rgba(51, 73, 78, 0.7);
+  --color-slate-700: rgba(51, 73, 78, 0.82);
+  --color-slate-800: rgba(51, 73, 78, 0.9);
+  --color-slate-900: var(--app-text);
+
+  --color-indigo-500: var(--app-accent);
+  --color-indigo-600: var(--app-accent);
+  --color-indigo-700: var(--app-accent);
+
+  --color-amber-100: rgba(255, 205, 31, 0.22);
+  --color-amber-600: var(--app-accent);
+  --color-amber-700: var(--app-accent);
+
+  --color-red-50: rgba(51, 73, 78, 0.08);
+  --color-red-500: var(--app-text);
+  --color-red-600: var(--app-text);
+  --color-red-700: var(--app-text);
+
+  --color-green-50: rgba(255, 205, 31, 0.18);
+  --color-green-500: var(--app-accent);
+  --color-green-600: var(--app-accent);
+  --color-green-700: var(--app-accent);
+
+  --color-emerald-500: var(--app-accent);
+  --color-emerald-700: var(--app-accent);
+
+  --radius-sm: 0.5rem;
+  --radius: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: "GT Walsheim Pro", sans-serif;
 }

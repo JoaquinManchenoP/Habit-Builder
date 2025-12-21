@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 const EXTRA_SMALL_QUERY = "(max-width: 360px)";
 
 export default function MonthLabels({ days }) {
-  const [cellSize, setCellSize] = useState(17);
+  const [cellSize, setCellSize] = useState(15);
 
   useEffect(() => {
     const mq = window.matchMedia(EXTRA_SMALL_QUERY);
-    const handle = (event) => setCellSize(event.matches ? 15 : 17);
+    const handle = (event) => setCellSize(event.matches ? 13 : 15);
     handle(mq);
     mq.addEventListener("change", handle);
     return () => mq.removeEventListener("change", handle);
@@ -65,7 +65,7 @@ export default function MonthLabels({ days }) {
 
   return (
     <div
-      className="mx-auto inline-grid items-center gap-x-[7px] px-[2px] text-[10px] font-semibold uppercase tracking-wide text-slate-400 max-[360px]:gap-x-[6px] max-[360px]:text-[9px]"
+      className="mx-auto inline-grid items-center gap-x-[7px] px-[2px] text-[9px] font-semibold uppercase tracking-wide text-slate-400 max-[360px]:gap-x-[6px] max-[360px]:text-[8px]"
       style={{ gridTemplateColumns: `repeat(${columns}, ${cellSize}px)` }}
     >
       {filtered.map((item, idx) => {

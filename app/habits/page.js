@@ -157,10 +157,7 @@ export default function HabitsPage() {
   return (
     <>
       <section className="space-y-4">
-        <PageHeader
-          habitsCount={habits.length}
-          usingMockData={usingMockData}
-        />
+        <PageHeader habitsCount={habits.length} usingMockData={usingMockData} />
         <HabitsList
           habits={habits}
           onComplete={handleComplete}
