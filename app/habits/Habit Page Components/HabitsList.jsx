@@ -18,7 +18,7 @@ export default function HabitsList({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 justify-items-center sm:gap-4 md:[grid-template-columns:repeat(auto-fit,minmax(460px,1fr))] md:justify-items-center md:gap-5">
+    <div className="grid grid-cols-1 gap-3 justify-items-center sm:gap-4 min-[1125px]:[grid-template-columns:repeat(auto-fit,minmax(460px,1fr))] min-[1125px]:justify-items-center min-[1125px]:gap-5">
       {[...habits]
         .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
         .map((habit) => (

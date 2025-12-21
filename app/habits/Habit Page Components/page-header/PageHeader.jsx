@@ -24,7 +24,7 @@ export default function PageHeader({ habitsCount, usingMockData }) {
         <Link href="/habits/new">
           <Button
             type="button"
-            className="h-10 w-10 p-0 text-xl font-bold transition-transform duration-150 ease-out hover:scale-105 active:scale-95"
+            className="h-10 w-10 bg-[color:var(--app-accent-dark)] p-0 text-xl font-bold text-slate-900 transition-transform duration-150 ease-out hover:scale-105 hover:bg-[color:var(--app-accent)] active:scale-95"
           >
             +
           </Button>
