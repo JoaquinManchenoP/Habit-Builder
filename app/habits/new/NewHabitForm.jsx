@@ -47,13 +47,13 @@ export default function NewHabitForm() {
     setStatusMessage("Habit saved locally.");
     setStatusTone("success");
     setName("");
-    setTimeout(() => router.push("/dashboard"), 400);
+    setTimeout(() => router.push("/my-stats"), 400);
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm w-2/3"
+      className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm w-2/3"
     >
       <label className="block space-y-2 text-sm font-medium text-slate-700">
         <span>Create a new habit</span>
@@ -86,7 +86,7 @@ export default function NewHabitForm() {
                   [dayKey]: event.target.checked,
                 }))
               }
-              className="grid h-8 w-8 place-items-center rounded-lg border border-slate-300 bg-white text-[11px] font-bold text-white transition appearance-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 checked:border-slate-900 checked:bg-slate-900 checked:before:content-['✓']"
+              className="grid h-8 w-8 place-items-center rounded-lg border border-slate-300 bg-white text-[11px] font-bold text-white transition appearance-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 checked:border-indigo-600 checked:bg-indigo-600 checked:before:content-['✓']"
             />
             <span>{WEEKDAY_LABELS[dayKey]}</span>
           </label>
@@ -95,7 +95,7 @@ export default function NewHabitForm() {
       <div className="flex items-center gap-3">
         <Button
           type="submit"
-          className="h-11 rounded-2xl bg-slate-900 px-6 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-sm transition hover:bg-slate-800 active:scale-95"
+          className="h-11 rounded-2xl bg-indigo-600 px-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-900 shadow-sm transition hover:bg-indigo-500 active:scale-95"
         >
           Save habit
         </Button>

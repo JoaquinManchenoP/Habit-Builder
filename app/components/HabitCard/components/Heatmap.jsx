@@ -3,12 +3,12 @@ import MonthLabels from "./MonthLabels";
 import { parseISODate } from "../../../lib/analytics";
 import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
 
-const CELL_SIZE = 17; // px
+const CELL_SIZE = 15; // px
 const GAP_SIZE = 7; // px between columns
 const PADDING_BUFFER = 4; // px total horizontal padding in the container
 const MAX_COLUMNS_CAP = 32; // safety guard to avoid runaway growth
 const SINGLE_COLUMN_QUERY = "(max-width: 1024px)";
-const OFF_DAY_COLOR = "#6b7280";
+const OFF_DAY_COLOR = "rgba(51, 73, 78, 0.35)";
 
 export default function Heatmap({ days, color, activeDays, createdAt }) {
   const containerRef = useRef(null);
@@ -88,16 +88,25 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
     const defaultColumns = Math.ceil(days.length / 7);
     const maxColumnsByWidth = Math.max(
       1,
-      Math.floor((availableWidth + GAP_SIZE - PADDING_BUFFER) / (CELL_SIZE + GAP_SIZE))
+      Math.floor(
+        (availableWidth + GAP_SIZE - PADDING_BUFFER) / (CELL_SIZE + GAP_SIZE)
+      )
     );
     const targetColumns = Math.min(
-      Math.max(defaultColumns, maxColumnsByWidth),
+      Math.max(1, maxColumnsByWidth),
       MAX_COLUMNS_CAP
     );
 
-    if (targetColumns <= defaultColumns) return days;
+    if (targetColumns === defaultColumns) return days;
+    if (targetColumns < defaultColumns) {
+      const totalDays = targetColumns * 7;
+      const startIndex = Math.max(0, days.length - totalDays);
+      return days.slice(startIndex);
+    }
 
-    const completionMap = new Set(days.filter((d) => d.completed).map((d) => d.iso));
+    const completionMap = new Set(
+      days.filter((d) => d.completed).map((d) => d.iso)
+    );
     const latestIso = days[days.length - 1]?.iso;
     if (!latestIso) return days;
     const latestDate = new Date(latestIso);
@@ -124,12 +133,18 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
     });
 
     return extended;
-  }, [availableWidth, createdAtDate, days, isSingleColumn, normalizedActiveDays]);
+  }, [
+    availableWidth,
+    createdAtDate,
+    days,
+    isSingleColumn,
+    normalizedActiveDays,
+  ]);
 
   return (
     <div
       ref={containerRef}
-      className="mt-2 flex flex-col justify-center space-y-2 max-[360px]:mt-1.5 max-[360px]:space-y-1.5"
+      className=" flex flex-col justify-center space-y-2 max-[360px]:mt-1.5 max-[360px]:space-y-1.5"
     >
       <MonthLabels days={displayDays} />
       <div className="grid grid-flow-col grid-rows-7 gap-y-[1.5px] gap-x-[7px] justify-center px-[2px] text-xs max-[360px]:gap-y-[1px] max-[360px]:gap-x-[6px] max-[360px]:text-[11px]">
@@ -141,13 +156,13 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
             onMouseLeave={handleLeave}
           >
             <div
-              className="h-[17px] w-[17px] rounded-sm border border-slate-200 max-[360px]:h-[15px] max-[360px]:w-[15px]"
+              className="h-[15px] w-[15px] rounded-sm border border-slate-200 max-[360px]:h-[13px] max-[360px]:w-[13px]"
               style={{
                 backgroundColor: day.completed
                   ? color || "#10b981"
                   : day.isOffDay
-                    ? OFF_DAY_COLOR
-                    : "rgba(148, 163, 184, 0.25)",
+                  ? OFF_DAY_COLOR
+                  : "rgba(148, 163, 184, 0.25)",
               }}
               title={formatHoverDate(day.iso)}
             />

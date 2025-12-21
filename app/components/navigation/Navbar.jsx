@@ -5,6 +5,26 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   {
+    label: "Home",
+    href: "/home",
+    icon: function HomeIcon({ className }) {
+      return (
+        <svg
+          className={className}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 11.5l8-7 8 7" />
+          <path d="M6.5 10.5V19a1.5 1.5 0 0 0 1.5 1.5h8A1.5 1.5 0 0 0 17.5 19v-8.5" />
+        </svg>
+      );
+    },
+  },
+  {
     label: "My Habits",
     href: "/habits",
     icon: function HabitsIcon({ className }) {
@@ -27,7 +47,7 @@ const NAV_ITEMS = [
   },
   {
     label: "My Stats",
-    href: "/dashboard",
+    href: "/my-stats",
     icon: function StatsIcon({ className }) {
       return (
         <svg
@@ -104,8 +124,8 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:hidden">
-        <Link href="/habits" className="text-lg font-bold text-indigo-700">
+      <header className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
+        <Link href="/home" className="text-lg font-bold text-slate-900">
           Habit Builder
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium text-slate-700">
@@ -116,14 +136,14 @@ export default function Navbar() {
           ))}
         </nav>
       </header>
-      <aside className="hidden w-56 shrink-0 flex-col gap-6 md:flex">
-        <Link href="/habits" className="flex items-center gap-3 text-sm font-semibold text-slate-800">
+      <aside className="hidden w-56 shrink-0 flex-col gap-6 lg:flex">
+        <Link href="/home" className="flex items-center gap-3 text-sm font-semibold text-slate-800">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
             <span className="text-base font-bold text-slate-800">HB</span>
           </span>
           <span className="leading-tight">Habit Builder</span>
         </Link>
-        <nav className="flex flex-col gap-2 rounded-3xl bg-white/80 p-3 shadow-sm ring-1 ring-slate-200/70">
+        <nav className="flex flex-col gap-2 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -134,14 +154,14 @@ export default function Navbar() {
                 aria-current={isActive ? "page" : undefined}
                 className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
                   isActive
-                    ? "bg-slate-200/80 text-slate-900 shadow-sm"
+                    ? "bg-amber-100 text-slate-900 shadow-sm"
                     : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
                 }`}
               >
                 <span
                   className={`grid h-10 w-10 place-items-center rounded-2xl border ${
                     isActive
-                      ? "border-slate-900 bg-slate-900 text-white"
+                      ? "border-indigo-600 bg-indigo-600 text-slate-900"
                       : "border-slate-200 bg-white text-slate-600"
                   }`}
                 >

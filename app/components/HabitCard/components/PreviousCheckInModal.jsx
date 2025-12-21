@@ -11,7 +11,7 @@ const Calendar = ({ monthDate, selectedDate, onSelectDate, onMonthChange }) => {
   });
 
   return (
-    <div className="space-y-3 rounded-md border border-slate-200 bg-slate-50/70 p-3">
+    <div className="space-y-3 rounded-md border border-slate-200 bg-white p-3">
       <div className="flex items-center justify-between">
         <button
           type="button"
