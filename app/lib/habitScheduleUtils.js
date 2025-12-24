@@ -21,3 +21,26 @@ export const isHabitLaterThisWeek = (habit, date = new Date()) => {
   const remainingKeys = WEEKDAY_ORDER.slice(startIndex + 1);
   return remainingKeys.some((key) => habit.activeDays[key]);
 };
+
+export const getStartOfWeekLocal = (date = new Date()) => {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  const day = start.getDay();
+  const diffToMonday = (day + 6) % 7;
+  start.setDate(start.getDate() - diffToMonday);
+  return start;
+};
+
+export const countCheckInsThisWeek = (checkIns = [], date = new Date()) => {
+  if (!Array.isArray(checkIns) || checkIns.length === 0) return 0;
+  const start = getStartOfWeekLocal(date);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 7);
+  return checkIns.reduce((count, isoTimestamp) => {
+    const checkDate = new Date(isoTimestamp);
+    if (checkDate >= start && checkDate < end) {
+      return count + 1;
+    }
+    return count;
+  }, 0);
+};

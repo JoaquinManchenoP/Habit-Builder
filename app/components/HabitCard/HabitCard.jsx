@@ -54,7 +54,7 @@ export default function HabitCard({
           >
             <CardHeader
               name={habit.name}
-              color={habit.color}
+              color={habit.themeColor}
               isCompletedToday={isCompletedToday}
               onToggleComplete={handleToggleComplete}
             />
@@ -62,13 +62,13 @@ export default function HabitCard({
               <MetricsGrid
                 metrics={metrics}
                 consistencyPercent={consistencyPercent}
-                color={habit.color}
+                color={habit.themeColor}
               />
             </div>
             <div className="mt-0">
               <Heatmap
                 days={days}
-                color={habit.color}
+                color={habit.themeColor}
                 activeDays={habit.activeDays}
                 createdAt={habit.createdAt}
               />

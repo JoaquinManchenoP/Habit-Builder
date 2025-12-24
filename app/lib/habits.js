@@ -1,5 +1,6 @@
 import {
   addCheckIn,
+  addWeeklyCheckIn,
   createHabit as createHabitRecord,
   deleteHabit as deleteHabitRecord,
   getDefaultUserId,
@@ -16,9 +17,16 @@ export function getHabits() {
 export function createHabit(
   name,
   activeDays = DEFAULT_ACTIVE_DAYS,
-  goalType = "daily"
+  goalType = "daily",
+  targetCount = 1
 ) {
-  return createHabitRecord(getDefaultUserId(), { name, activeDays, goalType });
+  return createHabitRecord(getDefaultUserId(), {
+    name,
+    activeDays,
+    goalType,
+    timesPerDay: goalType === "daily" ? targetCount : undefined,
+    timesPerWeek: goalType === "weekly" ? targetCount : undefined,
+  });
 }
 
 export function deleteHabit(id) {
@@ -27,6 +35,10 @@ export function deleteHabit(id) {
 
 export function markHabitCompleted(id, isoDateOverride = null) {
   return addCheckIn(id, isoDateOverride);
+}
+
+export function addWeeklyHabitCheckIn(id, timestamp = null) {
+  return addWeeklyCheckIn(id, timestamp);
 }
 
 export function removeLastCompletion(id) {

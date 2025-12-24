@@ -1,6 +1,7 @@
 import { applyColors } from "./analytics";
 import {
   addMockCheckIn,
+  addMockWeeklyCheckIn,
   deleteMockHabit,
   getDefaultUserId,
   getHabitsByUserId,
@@ -14,6 +15,9 @@ export { deleteMockHabit, updateMockHabitDetails, updateMockHabitName };
 
 export const markMockHabitCompleted = (id, isoDateOverride = null) =>
   addMockCheckIn(id, isoDateOverride);
+
+export const addMockWeeklyHabitCheckIn = (id, timestamp = null) =>
+  addMockWeeklyCheckIn(id, timestamp);
 
 export const removeMockHabitLastCompletion = (id) => removeMockLastCompletion(id);
 

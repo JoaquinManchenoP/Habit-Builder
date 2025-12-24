@@ -1,5 +1,6 @@
 import { DEFAULT_ACTIVE_DAYS, normalizeActiveDays } from "./habitSchedule";
 import { buildMockHabits } from "./analytics";
+import { getThemeColorForGoalType } from "./habitTheme";
 
 const STORAGE_KEY = "habits";
 const DEFAULT_USER_ID = "local-user";
@@ -23,15 +24,28 @@ const getStorage = () => {
 
 const normalizeHabit = (habit) => {
   const completions = Array.isArray(habit.completions) ? habit.completions : [];
+  const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
   const createdAt =
     habit.createdAt ||
     (completions.length ? completions[0] : new Date().toISOString().slice(0, 10));
+  const goalType = habit.goalType || "daily";
+  const themeColor = habit.themeColor || getThemeColorForGoalType(goalType);
+  const timesPerDay = Number.isFinite(habit.timesPerDay)
+    ? Math.max(1, Math.floor(habit.timesPerDay))
+    : 1;
+  const timesPerWeek = Number.isFinite(habit.timesPerWeek)
+    ? Math.max(1, Math.floor(habit.timesPerWeek))
+    : 1;
 
   return {
     ...habit,
     createdAt,
     completions,
-    goalType: habit.goalType || "daily",
+    checkIns,
+    goalType,
+    themeColor,
+    timesPerDay: goalType === "daily" ? timesPerDay : habit.timesPerDay,
+    timesPerWeek: goalType === "weekly" ? timesPerWeek : habit.timesPerWeek,
     activeDays: normalizeActiveDays(habit.activeDays),
   };
 };
@@ -43,7 +57,21 @@ const readUserHabits = () => {
   if (!storedValue) return [];
   const parsed = safeParse(storedValue);
   const habits = Array.isArray(parsed) ? parsed : [];
-  return habits.map(normalizeHabit);
+  const normalized = habits.map(normalizeHabit);
+  const needsPersist = normalized.some((habit, index) => {
+    const original = habits[index] || {};
+    return (
+      original.goalType !== habit.goalType ||
+      original.themeColor !== habit.themeColor ||
+      original.timesPerDay !== habit.timesPerDay ||
+      original.timesPerWeek !== habit.timesPerWeek ||
+      original.checkIns === undefined
+    );
+  });
+  if (needsPersist) {
+    persistUserHabits(normalized);
+  }
+  return normalized;
 };
 
 const persistUserHabits = (habits) => {
@@ -77,6 +105,15 @@ export const getHabitById = (habitId) => {
 
 export const createHabit = (userId, habitData = {}) => {
   const habits = readUserHabits();
+  const goalType = habitData.goalType || "daily";
+  const themeColor =
+    habitData.themeColor || getThemeColorForGoalType(goalType);
+  const timesPerDay = Number.isFinite(habitData.timesPerDay)
+    ? Math.max(1, Math.floor(habitData.timesPerDay))
+    : 1;
+  const timesPerWeek = Number.isFinite(habitData.timesPerWeek)
+    ? Math.max(1, Math.floor(habitData.timesPerWeek))
+    : 1;
   const newHabit = {
     id:
       typeof crypto !== "undefined" && crypto.randomUUID
@@ -85,7 +122,11 @@ export const createHabit = (userId, habitData = {}) => {
     name: habitData.name || "New habit",
     createdAt: new Date().toISOString().slice(0, 10),
     completions: [],
-    goalType: habitData.goalType || "daily",
+    checkIns: [],
+    goalType,
+    themeColor,
+    timesPerDay: goalType === "daily" ? timesPerDay : undefined,
+    timesPerWeek: goalType === "weekly" ? timesPerWeek : undefined,
     activeDays: normalizeActiveDays(habitData.activeDays || DEFAULT_ACTIVE_DAYS),
   };
   const updated = [...habits, newHabit];
@@ -97,9 +138,28 @@ export const updateHabit = (habitId, updates = {}) => {
   const habits = readUserHabits();
   const updated = habits.map((habit) => {
     if (habit.id !== habitId) return habit;
+    const goalType = updates.goalType || habit.goalType || "daily";
+    const themeColor =
+      updates.themeColor ||
+      habit.themeColor ||
+      getThemeColorForGoalType(goalType);
+    const timesPerDay = Number.isFinite(updates.timesPerDay)
+      ? Math.max(1, Math.floor(updates.timesPerDay))
+      : Number.isFinite(habit.timesPerDay)
+      ? habit.timesPerDay
+      : 1;
+    const timesPerWeek = Number.isFinite(updates.timesPerWeek)
+      ? Math.max(1, Math.floor(updates.timesPerWeek))
+      : Number.isFinite(habit.timesPerWeek)
+      ? habit.timesPerWeek
+      : 1;
     return {
       ...habit,
       ...updates,
+      goalType,
+      themeColor,
+      timesPerDay: goalType === "daily" ? timesPerDay : habit.timesPerDay,
+      timesPerWeek: goalType === "weekly" ? timesPerWeek : habit.timesPerWeek,
       activeDays: normalizeActiveDays(
         updates.activeDays ? updates.activeDays : habit.activeDays
       ),
@@ -179,6 +239,17 @@ export const updateMockHabitDetails = (habitId, updates = {}) =>
         ? {
             ...habit,
             ...updates,
+            goalType: updates.goalType || habit.goalType || "daily",
+            themeColor:
+              updates.themeColor ||
+              habit.themeColor ||
+              getThemeColorForGoalType(updates.goalType || habit.goalType || "daily"),
+            timesPerDay: Number.isFinite(updates.timesPerDay)
+              ? Math.max(1, Math.floor(updates.timesPerDay))
+              : habit.timesPerDay,
+            timesPerWeek: Number.isFinite(updates.timesPerWeek)
+              ? Math.max(1, Math.floor(updates.timesPerWeek))
+              : habit.timesPerWeek,
             activeDays: normalizeActiveDays(
               updates.activeDays ? updates.activeDays : habit.activeDays
             ),
@@ -186,6 +257,35 @@ export const updateMockHabitDetails = (habitId, updates = {}) =>
         : habit
     )
   );
+
+export const addWeeklyCheckIn = (habitId, timestamp = null) => {
+  const habits = readUserHabits();
+  const isoTimestamp = timestamp || new Date().toISOString();
+  const updated = habits.map((habit) => {
+    if (habit.id !== habitId) return habit;
+    const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+    return {
+      ...habit,
+      checkIns: [...checkIns, isoTimestamp],
+    };
+  });
+  persistUserHabits(updated);
+  return updated;
+};
+
+export const addMockWeeklyCheckIn = (habitId, timestamp = null) => {
+  const isoTimestamp = timestamp || new Date().toISOString();
+  return setSessionMockHabits(
+    getSessionMockHabits().map((habit) => {
+      if (habit.id !== habitId) return habit;
+      const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+      return {
+        ...habit,
+        checkIns: [...checkIns, isoTimestamp],
+      };
+    })
+  );
+};
 
 export const updateMockHabitName = (habitId, name) =>
   updateMockHabitDetails(habitId, { name });
