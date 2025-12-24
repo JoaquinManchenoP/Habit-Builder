@@ -34,12 +34,12 @@ const buildGradient = (baseColor) => {
     g: mixChannel(rgb.g, 255, 0.35),
     b: mixChannel(rgb.b, 255, 0.35),
   };
-  const darker = {
-    r: mixChannel(rgb.r, 0, 0.15),
-    g: mixChannel(rgb.g, 0, 0.15),
-    b: mixChannel(rgb.b, 0, 0.15),
+  const brighter = {
+    r: mixChannel(rgb.r, 255, 0.2),
+    g: mixChannel(rgb.g, 255, 0.2),
+    b: mixChannel(rgb.b, 255, 0.2),
   };
-  return { start: rgbToHex(lighter), end: rgbToHex(darker) };
+  return { start: rgbToHex(lighter), end: rgbToHex(brighter) };
 };
 
 export default function CircularProgress({

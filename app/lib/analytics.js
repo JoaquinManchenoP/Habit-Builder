@@ -1,4 +1,5 @@
 import { DEFAULT_ACTIVE_DAYS, isActiveDay, normalizeActiveDays } from "./habitSchedule";
+import { getThemeColorForGoalType } from "./habitTheme";
 
 const COLORS = [
   "#ffe08a",
@@ -57,6 +58,7 @@ const buildMockHabits = (today = new Date()) => {
     new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())),
   );
   const iso = (offset) => toISODate(addDays(weekAnchor, offset));
+  const dailyThemeColor = getThemeColorForGoalType("daily");
 
   return [
     {
@@ -64,6 +66,10 @@ const buildMockHabits = (today = new Date()) => {
       name: "Morning Run",
       createdAt: iso(-45),
       isMock: true,
+      goalType: "daily",
+      themeColor: dailyThemeColor,
+      timesPerDay: 1,
+      checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,
         sat: false,
@@ -108,6 +114,10 @@ const buildMockHabits = (today = new Date()) => {
       name: "Read 20 Pages",
       createdAt: iso(-35),
       isMock: true,
+      goalType: "daily",
+      themeColor: dailyThemeColor,
+      timesPerDay: 1,
+      checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,
         wed: false,
@@ -146,6 +156,10 @@ const buildMockHabits = (today = new Date()) => {
       name: "Meditate",
       createdAt: iso(-32),
       isMock: true,
+      goalType: "daily",
+      themeColor: dailyThemeColor,
+      timesPerDay: 1,
+      checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,
         mon: false,
@@ -184,6 +198,10 @@ const buildMockHabits = (today = new Date()) => {
       name: "Strength Training",
       createdAt: iso(-40),
       isMock: true,
+      goalType: "daily",
+      themeColor: dailyThemeColor,
+      timesPerDay: 1,
+      checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,
         tue: false,
@@ -225,11 +243,17 @@ const buildMockHabits = (today = new Date()) => {
 };
 
 const applyColors = (habits) =>
-  habits.map((habit, index) => ({
-    ...habit,
-    color: habit.color || COLORS[index % COLORS.length],
-    activeDays: normalizeActiveDays(habit.activeDays),
-  }));
+  habits.map((habit, index) => {
+    const goalType = habit.goalType || "daily";
+    const themeColor = habit.themeColor || getThemeColorForGoalType(goalType);
+    return {
+      ...habit,
+      goalType,
+      themeColor,
+      color: themeColor || habit.color || COLORS[index % COLORS.length],
+      activeDays: normalizeActiveDays(habit.activeDays),
+    };
+  });
 
 const buildWeeklyPercentages = (habits) => {
   if (!habits.length) return { weeks: [], series: [] };
@@ -252,9 +276,14 @@ const buildWeeklyPercentages = (habits) => {
     );
     const activeDays = normalizeActiveDays(habit.activeDays);
 
+    const goalType = habit.goalType || "daily";
+    const themeColor = habit.themeColor || getThemeColorForGoalType(goalType);
+
     return {
       ...habit,
-      color: habit.color || COLORS[index % COLORS.length],
+      goalType,
+      themeColor,
+      color: themeColor || habit.color || COLORS[index % COLORS.length],
       activeDays,
       createdAt,
       completionDates,
