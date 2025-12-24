@@ -144,6 +144,7 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
   return (
     <div
       ref={containerRef}
+      data-habit-heatmap="true"
       className=" flex flex-col justify-center space-y-2 max-[360px]:mt-1.5 max-[360px]:space-y-1.5"
     >
       <MonthLabels days={displayDays} />
