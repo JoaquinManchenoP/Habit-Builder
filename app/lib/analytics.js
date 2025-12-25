@@ -69,6 +69,7 @@ const buildMockHabits = (today = new Date()) => {
       goalType: "daily",
       themeColor: dailyThemeColor,
       timesPerDay: 1,
+      timesPerWeek: undefined,
       checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,
@@ -117,6 +118,7 @@ const buildMockHabits = (today = new Date()) => {
       goalType: "daily",
       themeColor: dailyThemeColor,
       timesPerDay: 1,
+      timesPerWeek: undefined,
       checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,
@@ -159,6 +161,7 @@ const buildMockHabits = (today = new Date()) => {
       goalType: "daily",
       themeColor: dailyThemeColor,
       timesPerDay: 1,
+      timesPerWeek: undefined,
       checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,
@@ -201,6 +204,7 @@ const buildMockHabits = (today = new Date()) => {
       goalType: "daily",
       themeColor: dailyThemeColor,
       timesPerDay: 1,
+      timesPerWeek: undefined,
       checkIns: [],
       activeDays: {
         ...DEFAULT_ACTIVE_DAYS,

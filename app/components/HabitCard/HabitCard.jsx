@@ -6,6 +6,8 @@ import HabitCardMenuLayer from "./components/HabitCardMenuLayer";
 import Heatmap from "./components/Heatmap";
 import MetricsGrid from "./components/MetricsGrid";
 import { useHabitMetrics } from "./hooks/useHabitMetrics";
+import { countCheckInsThisWeek } from "../../lib/habitScheduleUtils";
+import { getWeeklyProgressShade } from "../../lib/habitTheme";
 
 export default function HabitCard({
   habit,
@@ -18,6 +20,18 @@ export default function HabitCard({
   const internalRef = useRef(null);
 
   const { days, metrics, consistencyPercent } = useHabitMetrics(habit);
+  const weeklyProgressShade =
+    habit.goalType === "weekly"
+      ? (() => {
+          const targetCount = Math.max(1, habit.timesPerWeek || 1);
+          const currentCount = countCheckInsThisWeek(habit.checkIns);
+          const clampedPercent = Math.min(
+            (currentCount / targetCount) * 100,
+            100
+          );
+          return getWeeklyProgressShade(clampedPercent);
+        })()
+      : habit.themeColor;
 
   return (
     <HabitCardMenuLayer
@@ -62,13 +76,13 @@ export default function HabitCard({
               <MetricsGrid
                 metrics={metrics}
                 consistencyPercent={consistencyPercent}
-                color={habit.themeColor}
+                color={weeklyProgressShade}
               />
             </div>
             <div className="mt-0">
               <Heatmap
                 days={days}
-                color={habit.themeColor}
+                color={weeklyProgressShade}
                 activeDays={habit.activeDays}
                 createdAt={habit.createdAt}
               />

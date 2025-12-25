@@ -4,7 +4,7 @@ import CircularProgress from "../../../components/HabitCard/components/CircularP
 
 export default function DailyHabitCard({ habit }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70">
+    <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-center gap-3">
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm">
           🥕
@@ -14,7 +14,7 @@ export default function DailyHabitCard({ habit }) {
           <p className="text-xs text-slate-500">Active today</p>
         </div>
       </div>
-      <div className="scale-[0.65]">
+      <div className="scale-[0.9]">
         <CircularProgress
           percent={Math.min(100, habit.completions?.length || 0)}
           value={habit.completions?.length || 0}

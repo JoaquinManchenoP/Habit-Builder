@@ -47,6 +47,9 @@ export default function CircularProgress({
   value,
   showPercent = false,
   color,
+  showCheckmark = true,
+  useCompletionColor = true,
+  completionColor = "#22c55e",
 }) {
   const safePercent = Math.max(0, Math.min(100, percent || 0));
   const initialValue = Number.isFinite(value) ? value : safePercent;
@@ -64,8 +67,11 @@ export default function CircularProgress({
     [circumference, safePercent]
   );
   const isComplete = safePercent >= 100;
-  const startColor = isComplete ? "#22c55e" : gradientColors.start;
-  const endColor = isComplete ? "#22c55e" : gradientColors.end;
+  const shouldShowCheckmark = showCheckmark && isComplete;
+  const startColor =
+    isComplete && useCompletionColor ? completionColor : gradientColors.start;
+  const endColor =
+    isComplete && useCompletionColor ? completionColor : gradientColors.end;
 
   useEffect(() => {
     const endValue = Number.isFinite(value) ? value : safePercent;
@@ -139,8 +145,8 @@ export default function CircularProgress({
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span
-          className={`text-[15px] font-extrabold text-slate-900 transition duration-300 ${
-            isComplete ? "scale-90 opacity-0" : "scale-100 opacity-100"
+          className={`text-[18px] font-black text-slate-900 transition duration-300 ${
+            shouldShowCheckmark ? "scale-90 opacity-0" : "scale-100 opacity-100"
           }`}
         >
           {showPercent ? `${displayValue} %` : displayValue}
@@ -148,10 +154,10 @@ export default function CircularProgress({
         <svg
           viewBox="0 0 24 24"
           className={`absolute h-8 w-8 transition duration-300 ${
-            isComplete ? "scale-100 opacity-100" : "scale-90 opacity-0"
+            shouldShowCheckmark ? "scale-100 opacity-100" : "scale-90 opacity-0"
           }`}
           fill="none"
-          stroke="#22c55e"
+          stroke={completionColor}
           strokeWidth="5"
           strokeLinecap="round"
           strokeLinejoin="round"

@@ -1,4 +1,5 @@
 import CircularProgress from "./CircularProgress/CircularProgress";
+import { getWeeklyProgressShade } from "../../../lib/habitTheme";
 
 const MetricCard = ({ title, value, subtitle, showDivider }) => (
   <div
@@ -27,6 +28,7 @@ const ConsistencyMetricCard = ({
   value,
   showPercent,
   color,
+  completionColor,
   showDivider,
 }) => (
   <div
@@ -45,6 +47,7 @@ const ConsistencyMetricCard = ({
         value={value}
         showPercent={showPercent}
         color={color}
+        completionColor={completionColor}
       />
     </div>
     <p className="text-[11px] text-slate-600 max-[360px]:text-[10px]">
@@ -60,16 +63,23 @@ export default function MetricsGrid({ metrics, consistencyPercent, color }) {
       <div className="grid w-full grid-cols-3 gap-3 max-[360px]:gap-3">
         {visibleMetrics.map((metric, index) =>
           metric.title === "Consistency" ? (
-            <ConsistencyMetricCard
-              key={metric.title}
-              title={metric.title}
-              subtitle={metric.subtitle}
-              percent={consistencyPercent}
-              value={consistencyPercent}
-              showPercent
-              color={color}
-              showDivider={index % 3 !== 0}
-            />
+            (() => {
+              const clampedPercent = Math.min(consistencyPercent || 0, 100);
+              const shade = getWeeklyProgressShade(clampedPercent);
+              return (
+                <ConsistencyMetricCard
+                  key={metric.title}
+                  title={metric.title}
+                  subtitle={metric.subtitle}
+                  percent={consistencyPercent}
+                  value={consistencyPercent}
+                  showPercent
+                  color={shade}
+                  completionColor={shade}
+                  showDivider={index % 3 !== 0}
+                />
+              );
+            })()
           ) : metric.title === "Streak" || metric.title === "Check-ins" ? (
             <ConsistencyMetricCard
               key={metric.title}

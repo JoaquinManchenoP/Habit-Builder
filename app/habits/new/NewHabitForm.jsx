@@ -14,8 +14,8 @@ export default function NewHabitForm() {
   const [name, setName] = useState("");
   const [goalType, setGoalType] = useState("");
   const [activeDays, setActiveDays] = useState({ ...DEFAULT_ACTIVE_DAYS });
-  const [timesPerDay, setTimesPerDay] = useState(1);
-  const [timesPerWeek, setTimesPerWeek] = useState(1);
+  const [timesPerDay, setTimesPerDay] = useState("1");
+  const [timesPerWeek, setTimesPerWeek] = useState("1");
   const [statusMessage, setStatusMessage] = useState("");
   const [statusTone, setStatusTone] = useState("muted");
   const router = useRouter();
@@ -51,9 +51,16 @@ export default function NewHabitForm() {
       return;
     }
 
-    const targetCount = goalType === "daily" ? timesPerDay : timesPerWeek;
+    const rawTarget = goalType === "daily" ? timesPerDay : timesPerWeek;
+    const targetCount = parseInt(rawTarget, 10);
+    const maxTarget = 20;
     if (!Number.isInteger(targetCount) || targetCount < 1) {
       setStatusMessage("Please provide a valid target count.");
+      setStatusTone("warning");
+      return;
+    }
+    if (targetCount > maxTarget) {
+      setStatusMessage(`Target count cannot exceed ${maxTarget}.`);
       setStatusTone("warning");
       return;
     }
@@ -67,7 +74,7 @@ export default function NewHabitForm() {
     setStatusMessage("Habit saved locally.");
     setStatusTone("success");
     setName("");
-    setTimeout(() => router.push("/my-stats"), 400);
+    setTimeout(() => router.push("/home"), 400);
   };
 
   return (
@@ -108,14 +115,10 @@ export default function NewHabitForm() {
           <input
             type="number"
             min={1}
+            max={20}
             step={1}
             value={timesPerDay}
-            onChange={(event) =>
-              setTimesPerDay(() => {
-                const next = parseInt(event.target.value, 10);
-                return Number.isInteger(next) && next >= 1 ? next : 1;
-              })
-            }
+            onChange={(event) => setTimesPerDay(event.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-base shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             inputMode="numeric"
           />
@@ -127,14 +130,10 @@ export default function NewHabitForm() {
           <input
             type="number"
             min={1}
+            max={20}
             step={1}
             value={timesPerWeek}
-            onChange={(event) =>
-              setTimesPerWeek(() => {
-                const next = parseInt(event.target.value, 10);
-                return Number.isInteger(next) && next >= 1 ? next : 1;
-              })
-            }
+            onChange={(event) => setTimesPerWeek(event.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-base shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             inputMode="numeric"
           />
