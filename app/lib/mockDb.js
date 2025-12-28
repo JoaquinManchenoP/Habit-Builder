@@ -28,6 +28,10 @@ const normalizeHabit = (habit) => {
   const createdAt =
     habit.createdAt ||
     (completions.length ? completions[0] : new Date().toISOString().slice(0, 10));
+  const createdAtTimestamp =
+    typeof habit.createdAtTimestamp === "number"
+      ? habit.createdAtTimestamp
+      : Date.parse(createdAt);
   const goalType = habit.goalType || "daily";
   const themeColor = habit.themeColor || getThemeColorForGoalType(goalType);
   const timesPerDay = Number.isFinite(habit.timesPerDay)
@@ -40,6 +44,7 @@ const normalizeHabit = (habit) => {
   return {
     ...habit,
     createdAt,
+    createdAtTimestamp,
     completions,
     checkIns,
     goalType,
@@ -121,6 +126,7 @@ export const createHabit = (userId, habitData = {}) => {
         : Date.now().toString(),
     name: habitData.name || "New habit",
     createdAt: new Date().toISOString().slice(0, 10),
+    createdAtTimestamp: Date.now(),
     completions: [],
     checkIns: [],
     goalType,

@@ -14,6 +14,7 @@ export default function HabitCardMenuLayer({
   onDelete,
   onComplete,
   isCompletedToday,
+  goalType,
   cardRef,
   children,
 }) {
@@ -61,7 +62,7 @@ export default function HabitCardMenuLayer({
 
   const menuContent = (
     <>
-      {isCompletedToday ? <CompletionOverlay /> : null}
+      {isCompletedToday && goalType !== "weekly" ? <CompletionOverlay /> : null}
       <CardMenu
         menu={menu}
         onClose={closeMenu}
@@ -74,6 +75,7 @@ export default function HabitCardMenuLayer({
 
   const handleCardClick = (event) => {
     if (event.target.closest("[data-habit-heatmap='true']")) return;
+    if (event.target.closest("[data-weekly-progress='true']")) return;
     if (event.target.closest("input[type='checkbox']")) return;
     openMenu(event);
   };

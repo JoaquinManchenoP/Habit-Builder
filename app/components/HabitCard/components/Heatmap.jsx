@@ -3,7 +3,7 @@ import MonthLabels from "./MonthLabels";
 import { parseISODate } from "../../../lib/analytics";
 import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
 
-const CELL_SIZE = 15; // px
+const CELL_SIZE = 10; // px
 const GAP_SIZE = 7; // px between columns
 const PADDING_BUFFER = 4; // px total horizontal padding in the container
 const MAX_COLUMNS_CAP = 32; // safety guard to avoid runaway growth

@@ -6,11 +6,13 @@ import HabitsList from "./Habit Page Components/HabitsList";
 import PageHeader from "./Habit Page Components/page-header/PageHeader";
 import {
   deleteHabit,
+  addWeeklyHabitCheckIn,
   markHabitCompleted,
   removeLastCompletion,
 } from "../lib/habits";
 import {
   deleteMockHabit,
+  addMockWeeklyHabitCheckIn,
   loadHabitsWithMock,
   markMockHabitCompleted,
   removeMockHabitLastCompletion,
@@ -61,6 +63,18 @@ export default function HabitsPage() {
       }
     }
 
+    const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
+    setHabits(hydrated);
+    setUsingMockData(usingMock);
+  };
+
+  const handleWeeklyCheckIn = (habit) => {
+    if (!habit) return;
+    if (habit.isMock) {
+      addMockWeeklyHabitCheckIn(habit.id);
+    } else {
+      addWeeklyHabitCheckIn(habit.id);
+    }
     const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
     setHabits(hydrated);
     setUsingMockData(usingMock);
@@ -161,6 +175,7 @@ export default function HabitsPage() {
         <HabitsList
           habits={habits}
           onComplete={handleComplete}
+          onWeeklyCheckIn={handleWeeklyCheckIn}
           onDeleteRequest={handleDeleteRequest}
           fadeTargetId={fadeTargetId}
           cardRefs={cardRefs}

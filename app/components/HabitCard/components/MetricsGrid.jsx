@@ -41,7 +41,7 @@ const ConsistencyMetricCard = ({
     <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 max-[360px]:text-[10px]">
       {title}
     </p>
-    <div className="mt-2 flex items-center justify-center">
+    <div className="mt-2 flex items-center justify-center scale-[0.8]">
       <CircularProgress
         percent={percent}
         value={value}
@@ -59,7 +59,7 @@ const ConsistencyMetricCard = ({
 export default function MetricsGrid({ metrics, consistencyPercent, color }) {
   const visibleMetrics = metrics.filter((metric) => metric.title !== "Started");
   return (
-    <div className="mt-3 flex items-center justify-center max-[360px]:mt-3">
+    <div className="flex items-center justify-center max-[360px]:mt-1">
       <div className="grid w-full grid-cols-3 gap-3 max-[360px]:gap-3">
         {visibleMetrics.map((metric, index) =>
           metric.title === "Consistency" ? (

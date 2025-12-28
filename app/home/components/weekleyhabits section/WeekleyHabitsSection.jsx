@@ -1,6 +1,6 @@
 "use client";
 
-import { countCheckInsThisWeek } from "../../../lib/habitScheduleUtils";
+import { countCheckInsLast7Days } from "../../../lib/habitScheduleUtils";
 import { getWeeklyProgressShade } from "../../../lib/habitTheme";
 import WeekleyHabitCard from "./WeekleyHabitCard";
 
@@ -13,7 +13,7 @@ export default function WeekleyHabitsSection({ weeklyList, onIncrement }) {
       <div className="space-y-3">
         {weeklyList.length ? (
           weeklyList.map((habit) => {
-            const currentCount = countCheckInsThisWeek(habit.checkIns);
+            const currentCount = countCheckInsLast7Days(habit.checkIns);
             const targetCount = Math.max(1, habit.timesPerWeek || 1);
             const clampedPercent = Math.min(
               (currentCount / targetCount) * 100,
@@ -22,6 +22,7 @@ export default function WeekleyHabitsSection({ weeklyList, onIncrement }) {
             const progressPercent = clampedPercent;
             const progressShade = getWeeklyProgressShade(clampedPercent);
             const isAtTarget = currentCount === targetCount;
+            const isCompleteWeek = currentCount >= targetCount;
             return (
               <WeekleyHabitCard
                 key={habit.id}
@@ -30,6 +31,7 @@ export default function WeekleyHabitsSection({ weeklyList, onIncrement }) {
                 progressPercent={progressPercent}
                 progressShade={progressShade}
                 isAtTarget={isAtTarget}
+                isCompleteWeek={isCompleteWeek}
                 onIncrement={onIncrement}
               />
             );

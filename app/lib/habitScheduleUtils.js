@@ -44,3 +44,18 @@ export const countCheckInsThisWeek = (checkIns = [], date = new Date()) => {
     return count;
   }, 0);
 };
+
+export const countCheckInsLast7Days = (checkIns = [], date = new Date()) => {
+  if (!Array.isArray(checkIns) || checkIns.length === 0) return 0;
+  const end = new Date(date);
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - 6);
+  return checkIns.reduce((count, isoTimestamp) => {
+    const checkDate = new Date(isoTimestamp);
+    if (checkDate >= start && checkDate <= end) {
+      return count + 1;
+    }
+    return count;
+  }, 0);
+};
