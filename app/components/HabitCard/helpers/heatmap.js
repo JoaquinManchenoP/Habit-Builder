@@ -3,6 +3,19 @@ import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
 
 const DAYS_TO_SHOW = 120;
 
+const toLocalDate = (value) => {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+      const [_, year, month, day] = match;
+      return new Date(Number(year), Number(month) - 1, Number(day));
+    }
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 export const buildRecentDays = (
   completions = [],
   activeDays,
@@ -11,16 +24,23 @@ export const buildRecentDays = (
 ) => {
   const today = new Date();
   const normalizedActiveDays = normalizeActiveDays(activeDays);
-  const createdAtDate = createdAt ? parseISODate(createdAt) : null;
   const isWeekly = goalType === "weekly";
+  const createdAtDate = createdAt ? parseISODate(createdAt) : null;
+  const createdAtLocalDate = isWeekly ? toLocalDate(createdAt) : null;
+  const completionSet = new Set(completions);
   return Array.from({ length: DAYS_TO_SHOW }, (_, index) => {
     const date = new Date();
     date.setDate(today.getDate() - (DAYS_TO_SHOW - 1 - index));
     const iso = date.toISOString().slice(0, 10);
     const isBeforeStart = createdAtDate ? date < createdAtDate : false;
-    const completed = completions.includes(iso);
+    const isBeforeWeeklyStart = createdAtLocalDate
+      ? date < createdAtLocalDate
+      : false;
+    const completed = isWeekly
+      ? !isBeforeWeeklyStart && completionSet.has(iso)
+      : completionSet.has(iso);
     const isOffDay = isWeekly
-      ? !completed
+      ? !isBeforeWeeklyStart && !completed
       : !isBeforeStart && !isActiveDay(date, normalizedActiveDays);
 
     return {

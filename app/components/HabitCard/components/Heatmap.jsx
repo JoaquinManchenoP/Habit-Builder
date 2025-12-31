@@ -10,7 +10,26 @@ const MAX_COLUMNS_CAP = 32; // safety guard to avoid runaway growth
 const SINGLE_COLUMN_QUERY = "(max-width: 1024px)";
 const OFF_DAY_COLOR = "rgba(51, 73, 78, 0.35)";
 
-export default function Heatmap({ days, color, activeDays, createdAt }) {
+const toLocalDate = (value) => {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+      const [_, year, month, day] = match;
+      return new Date(Number(year), Number(month) - 1, Number(day));
+    }
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export default function Heatmap({
+  days,
+  color,
+  activeDays,
+  createdAt,
+  goalType,
+}) {
   const containerRef = useRef(null);
   const [availableWidth, setAvailableWidth] = useState(null);
   const [isSingleColumn, setIsSingleColumn] = useState(false);
@@ -23,6 +42,11 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
   const createdAtDate = useMemo(
     () => (createdAt ? parseISODate(createdAt) : null),
     [createdAt]
+  );
+  const isWeekly = goalType === "weekly";
+  const createdAtLocalDate = useMemo(
+    () => (isWeekly ? toLocalDate(createdAt) : null),
+    [createdAt, isWeekly]
   );
 
   useEffect(() => {
@@ -109,7 +133,7 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
     );
     const latestIso = days[days.length - 1]?.iso;
     if (!latestIso) return days;
-    const latestDate = new Date(latestIso);
+    const latestDate = toLocalDate(latestIso) || new Date(latestIso);
     const totalDays = targetColumns * 7;
 
     const extended = Array.from({ length: totalDays }, (_, idxFromEnd) => {
@@ -117,6 +141,12 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
       date.setDate(latestDate.getDate() - (totalDays - 1 - idxFromEnd));
       const iso = date.toISOString().slice(0, 10);
       const existing = days.find((d) => d.iso === iso);
+      const isBeforeWeeklyStart = createdAtLocalDate
+        ? date < createdAtLocalDate
+        : false;
+      const completed = isWeekly
+        ? !isBeforeWeeklyStart && completionMap.has(iso)
+        : completionMap.has(iso);
       return (
         existing || {
           iso,
@@ -124,10 +154,12 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
             month: "short",
             day: "numeric",
           }),
-          completed: completionMap.has(iso),
+          completed,
           isOffDay:
-            !(createdAtDate && date < createdAtDate) &&
-            !isActiveDay(date, normalizedActiveDays),
+            isWeekly
+              ? !isBeforeWeeklyStart && !completed
+              : !(createdAtDate && date < createdAtDate) &&
+                !isActiveDay(date, normalizedActiveDays),
         }
       );
     });
@@ -136,8 +168,10 @@ export default function Heatmap({ days, color, activeDays, createdAt }) {
   }, [
     availableWidth,
     createdAtDate,
+    createdAtLocalDate,
     days,
     isSingleColumn,
+    isWeekly,
     normalizedActiveDays,
   ]);
 

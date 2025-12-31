@@ -100,6 +100,7 @@ export default function HabitCard({
                 color={weeklyProgressShade}
                 activeDays={habit.activeDays}
                 createdAt={habit.createdAt}
+                goalType={habit.goalType}
               />
             </div>
           </div>
