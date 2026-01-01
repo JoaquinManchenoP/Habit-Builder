@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   addMockWeeklyHabitCheckIn,
   loadHabitsWithMock,
+  markMockHabitCompleted,
 } from "../lib/habitData";
-import { addWeeklyHabitCheckIn } from "../lib/habits";
+import { addWeeklyHabitCheckIn, markHabitCompleted } from "../lib/habits";
 import { isHabitActiveToday } from "../lib/habitScheduleUtils";
 import WeekleyHabitsSection from "./components/weekleyhabits section/WeekleyHabitsSection";
 import DailyHabitsSection from "./components/dailyHabitsSection/DailyHabitSection";
@@ -65,6 +66,15 @@ export default function HomePage() {
     refreshHabits();
   };
 
+  const handleDailyIncrement = (habit) => {
+    if (habit.isMock) {
+      markMockHabitCompleted(habit.id);
+    } else {
+      markHabitCompleted(habit.id);
+    }
+    refreshHabits();
+  };
+
   const todayList = useMemo(() => todayHabits, [todayHabits]);
   const weeklyList = useMemo(() => weeklyHabits, [weeklyHabits]);
 
@@ -74,7 +84,10 @@ export default function HomePage() {
         <HomeCalendar weekDays={WEEK_DAYS} />
         <div className="space-y-4">
           <MainCircularProgress progress={TODAY_PROGRESS} />
-          <DailyHabitsSection todayList={todayList} />
+          <DailyHabitsSection
+            todayList={todayList}
+            onIncrement={handleDailyIncrement}
+          />
         </div>
         <WeekleyHabitsSection
           weeklyList={weeklyList}

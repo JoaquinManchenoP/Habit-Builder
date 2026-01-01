@@ -1,5 +1,4 @@
-import { parseISODate } from "../../../lib/analytics";
-import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
+import { normalizeActiveDays } from "../../../lib/habitSchedule";
 
 const DAYS_TO_SHOW = 120;
 
@@ -16,6 +15,20 @@ const toLocalDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const toLocalISODate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const LOCAL_DAY_KEY_BY_INDEX = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+const isActiveDayLocal = (date, activeDays) => {
+  const key = LOCAL_DAY_KEY_BY_INDEX[date.getDay()];
+  return Boolean(activeDays?.[key]);
+};
+
 export const buildRecentDays = (
   completions = [],
   activeDays,
@@ -25,23 +38,22 @@ export const buildRecentDays = (
   const today = new Date();
   const normalizedActiveDays = normalizeActiveDays(activeDays);
   const isWeekly = goalType === "weekly";
-  const createdAtDate = createdAt ? parseISODate(createdAt) : null;
-  const createdAtLocalDate = isWeekly ? toLocalDate(createdAt) : null;
+  const createdAtLocalDate = toLocalDate(createdAt);
   const completionSet = new Set(completions);
   return Array.from({ length: DAYS_TO_SHOW }, (_, index) => {
     const date = new Date();
     date.setDate(today.getDate() - (DAYS_TO_SHOW - 1 - index));
-    const iso = date.toISOString().slice(0, 10);
-    const isBeforeStart = createdAtDate ? date < createdAtDate : false;
-    const isBeforeWeeklyStart = createdAtLocalDate
-      ? date < createdAtLocalDate
-      : false;
+    const iso = isWeekly
+      ? date.toISOString().slice(0, 10)
+      : toLocalISODate(date);
+    const isBeforeStart = createdAtLocalDate ? date < createdAtLocalDate : false;
+    const isBeforeWeeklyStart = isWeekly && isBeforeStart;
     const completed = isWeekly
       ? !isBeforeWeeklyStart && completionSet.has(iso)
-      : completionSet.has(iso);
+      : !isBeforeStart && completionSet.has(iso);
     const isOffDay = isWeekly
       ? !isBeforeWeeklyStart && !completed
-      : !isBeforeStart && !isActiveDay(date, normalizedActiveDays);
+      : !isBeforeStart && !isActiveDayLocal(date, normalizedActiveDays);
 
     return {
       iso,

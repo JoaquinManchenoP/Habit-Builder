@@ -5,6 +5,38 @@ const LOCAL_DAY_KEY_BY_INDEX = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"]
 export const getLocalDayKey = (date = new Date()) =>
   LOCAL_DAY_KEY_BY_INDEX[date.getDay()];
 
+export const toLocalISODate = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export const countCheckInsOnLocalDate = (checkIns = [], targetDate) => {
+  if (!Array.isArray(checkIns) || checkIns.length === 0 || !targetDate) {
+    return 0;
+  }
+  const targetIso = toLocalISODate(targetDate);
+  return checkIns.reduce((count, isoTimestamp) => {
+    const checkDate = new Date(isoTimestamp);
+    if (Number.isNaN(checkDate.getTime())) return count;
+    return toLocalISODate(checkDate) === targetIso ? count + 1 : count;
+  }, 0);
+};
+
+export const getLastActiveDailyDate = (habit, date = new Date()) => {
+  const base = new Date(date);
+  base.setHours(0, 0, 0, 0);
+  if (!habit?.activeDays) return base;
+  for (let offset = 0; offset < 7; offset += 1) {
+    const probe = new Date(base);
+    probe.setDate(base.getDate() - offset);
+    const key = getLocalDayKey(probe);
+    if (habit.activeDays[key]) return probe;
+  }
+  return base;
+};
+
 export const isHabitActiveToday = (habit, date = new Date()) => {
   if (!habit?.activeDays) return false;
   if (habit.goalType === "weekly") return false;
