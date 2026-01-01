@@ -1,5 +1,8 @@
 import { parseISODate, toISODate } from "../../../lib/analytics";
-import { getStartOfWeekLocal } from "../../../lib/habitScheduleUtils";
+import {
+  getLocalDayKey,
+  getStartOfWeekLocal,
+} from "../../../lib/habitScheduleUtils";
 import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
 
 const toLocalISODate = (date) => {
@@ -7,6 +10,19 @@ const toLocalISODate = (date) => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+const toLocalDateFromISO = (iso) => {
+  if (!iso) return null;
+  const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const [_, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day));
+};
+
+const isActiveDayLocal = (date, activeDays) => {
+  const key = getLocalDayKey(date);
+  return Boolean(activeDays?.[key]);
 };
 
 const getWeeklyCounts = (habit) => {
@@ -86,42 +102,30 @@ export const calculateAvailableConsistency = (habit) => {
   }
   const today = new Date();
   const normalizedToday = new Date(
-    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
   );
-  const createdAtDate = habit.createdAt
-    ? parseISODate(habit.createdAt)
-    : normalizedToday;
-  const earliestCompletion = (habit.completions || []).reduce(
-    (earliest, iso) => {
-      const date = parseISODate(iso);
-      if (!earliest || date < earliest) return date;
-      return earliest;
-    },
-    null
-  );
-  const effectiveStart =
-    earliestCompletion && earliestCompletion < createdAtDate
-      ? earliestCompletion
-      : createdAtDate;
-  if (normalizedToday < effectiveStart) return 0;
+  const createdAtDate =
+    toLocalDateFromISO(habit.createdAt) || normalizedToday;
+  if (normalizedToday < createdAtDate) return 0;
   const normalizedActiveDays = normalizeActiveDays(habit.activeDays);
   const completionSet = new Set((habit.completions || []).map((iso) => iso));
-  let totalActiveDays = 0;
-  let completedActiveDays = 0;
-  let pointer = new Date(effectiveStart);
+  let totalHabitDays = 0;
+  let completedHabitDays = 0;
+  let pointer = new Date(createdAtDate);
   while (pointer <= normalizedToday) {
-    const iso = toISODate(pointer);
-    const completed = completionSet.has(iso);
-    if (isActiveDay(pointer, normalizedActiveDays) || completed) {
-      totalActiveDays += 1;
-      if (completed) {
-        completedActiveDays += 1;
+    if (isActiveDayLocal(pointer, normalizedActiveDays)) {
+      totalHabitDays += 1;
+      const iso = toLocalISODate(pointer);
+      if (completionSet.has(iso)) {
+        completedHabitDays += 1;
       }
     }
-    pointer = new Date(pointer.setUTCDate(pointer.getUTCDate() + 1));
+    pointer = new Date(pointer.setDate(pointer.getDate() + 1));
   }
-  if (totalActiveDays <= 0) return 0;
-  return Math.round((completedActiveDays / totalActiveDays) * 100);
+  if (totalHabitDays <= 0) return 0;
+  return Math.round((completedHabitDays / totalHabitDays) * 100);
 };
 
 export const calculateLongestStreak = (habit) => {
@@ -160,6 +164,35 @@ export const calculateLongestStreak = (habit) => {
   return longest;
 };
 
+export const calculateDailyCurrentStreak = (habit) => {
+  if (!habit || habit.goalType === "weekly") return 0;
+  const today = new Date();
+  const normalizedToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+  const createdAtDate =
+    toLocalDateFromISO(habit.createdAt) || normalizedToday;
+  if (normalizedToday < createdAtDate) return 0;
+  const normalizedActiveDays = normalizeActiveDays(habit.activeDays);
+  const completionSet = new Set((habit.completions || []).map((iso) => iso));
+  let streak = 0;
+  const pointer = new Date(normalizedToday);
+  while (pointer >= createdAtDate) {
+    if (isActiveDayLocal(pointer, normalizedActiveDays)) {
+      const iso = toLocalISODate(pointer);
+      if (completionSet.has(iso)) {
+        streak += 1;
+      } else {
+        break;
+      }
+    }
+    pointer.setDate(pointer.getDate() - 1);
+  }
+  return streak;
+};
+
 export const calculateStartedDaysAgo = (habit) => {
   if (!habit) return 0;
   const today = new Date();
@@ -194,7 +227,7 @@ export const buildMetrics = (
   const totalCheckIns =
     habit.goalType === "weekly"
       ? habit.checkIns?.length || 0
-      : habit.completions?.length || 0;
+      : habit.checkIns?.length || 0;
   const consistencyLabel = habit.goalType === "weekly" ? "of weeks" : "of days";
   const streakUnit =
     habit.goalType === "weekly"

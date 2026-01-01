@@ -8,9 +8,11 @@ export default function CardHeader({
   onOpenMenu,
   goalType,
   weeklyProgress,
+  dailyProgress,
 }) {
   const habitTypeLabel = goalType === "weekly" ? "Weekly" : "Daily";
   const isWeekly = goalType === "weekly";
+  const progress = isWeekly ? weeklyProgress : dailyProgress;
   return (
     <div
       className="flex items-center justify-between gap-4 max-[360px]:gap-3"
@@ -27,20 +29,20 @@ export default function CardHeader({
         </div>
       </div>
       <div className="mr-6 flex gap-2 max-[360px]:mr-4 max-[360px]:gap-1.5">
-        {isWeekly && weeklyProgress ? (
+        {progress ? (
           <div
-            data-weekly-progress="true"
+            data-habit-progress="true"
             onClick={(event) => {
               event.stopPropagation();
-              weeklyProgress.onIncrement?.();
+              progress.onIncrement?.();
             }}
             className="scale-[0.85]"
           >
             <CircularProgress
-              percent={weeklyProgress.percent}
-              value={weeklyProgress.count}
-              color={weeklyProgress.shade}
-              showCheckmark={weeklyProgress.isAtTarget}
+              percent={progress.percent}
+              value={progress.count}
+              color={progress.shade}
+              showCheckmark={progress.showCheckmark}
               useCompletionColor={false}
             />
           </div>

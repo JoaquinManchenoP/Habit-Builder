@@ -55,6 +55,21 @@ const normalizeHabit = (habit) => {
   };
 };
 
+const toLocalISODate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const toLocalDateFromISO = (isoDate) => {
+  if (!isoDate) return null;
+  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const [_, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day), 12);
+};
+
 const readUserHabits = () => {
   const storage = getStorage();
   if (!storage) return [];
@@ -184,15 +199,24 @@ export const deleteHabit = (habitId) => {
 
 export const addCheckIn = (habitId, isoDateOverride = null) => {
   const habits = readUserHabits();
-  const today = new Date();
-  const isoDate = isoDateOverride || today.toISOString().slice(0, 10);
+  const targetDate =
+    (isoDateOverride && toLocalDateFromISO(isoDateOverride)) || new Date();
+  const isoDate = toLocalISODate(targetDate);
+  const isoTimestamp = targetDate.toISOString();
   const updated = habits.map((habit) => {
     if (habit.id !== habitId) return habit;
-    if (habit.completions.includes(isoDate)) return habit;
+    const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+    const completions = Array.isArray(habit.completions)
+      ? habit.completions
+      : [];
+    const nextCompletions = completions.includes(isoDate)
+      ? completions
+      : [...completions, isoDate];
     return {
       ...habit,
       createdAt: habit.createdAt || isoDate,
-      completions: [...habit.completions, isoDate],
+      checkIns: [...checkIns, isoTimestamp],
+      completions: nextCompletions,
     };
   });
   persistUserHabits(updated);
@@ -318,16 +342,25 @@ export const deleteMockHabit = (habitId) =>
   );
 
 export const addMockCheckIn = (habitId, isoDateOverride = null) => {
-  const today = new Date().toISOString().slice(0, 10);
-  const targetDate = isoDateOverride || today;
+  const targetDate =
+    (isoDateOverride && toLocalDateFromISO(isoDateOverride)) || new Date();
+  const isoDate = toLocalISODate(targetDate);
+  const isoTimestamp = targetDate.toISOString();
   return setSessionMockHabits(
     getSessionMockHabits().map((habit) => {
       if (habit.id !== habitId) return habit;
-      if (habit.completions.includes(targetDate)) return habit;
+      const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+      const completions = Array.isArray(habit.completions)
+        ? habit.completions
+        : [];
+      const nextCompletions = completions.includes(isoDate)
+        ? completions
+        : [...completions, isoDate];
       return {
         ...habit,
-        createdAt: habit.createdAt || targetDate,
-        completions: [...habit.completions, targetDate],
+        createdAt: habit.createdAt || isoDate,
+        checkIns: [...checkIns, isoTimestamp],
+        completions: nextCompletions,
       };
     })
   );

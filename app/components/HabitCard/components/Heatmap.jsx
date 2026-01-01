@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import MonthLabels from "./MonthLabels";
-import { parseISODate } from "../../../lib/analytics";
-import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
+import { normalizeActiveDays } from "../../../lib/habitSchedule";
 
 const CELL_SIZE = 10; // px
 const GAP_SIZE = 7; // px between columns
@@ -9,6 +8,7 @@ const PADDING_BUFFER = 4; // px total horizontal padding in the container
 const MAX_COLUMNS_CAP = 32; // safety guard to avoid runaway growth
 const SINGLE_COLUMN_QUERY = "(max-width: 1024px)";
 const OFF_DAY_COLOR = "rgba(51, 73, 78, 0.35)";
+const MISSED_DAY_COLOR = "#ef4444";
 
 const toLocalDate = (value) => {
   if (!value) return null;
@@ -21,6 +21,13 @@ const toLocalDate = (value) => {
   }
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const LOCAL_DAY_KEY_BY_INDEX = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+const isActiveDayLocal = (date, activeDays) => {
+  const key = LOCAL_DAY_KEY_BY_INDEX[date.getDay()];
+  return Boolean(activeDays?.[key]);
 };
 
 export default function Heatmap({
@@ -39,15 +46,16 @@ export default function Heatmap({
     () => normalizeActiveDays(activeDays),
     [activeDays]
   );
-  const createdAtDate = useMemo(
-    () => (createdAt ? parseISODate(createdAt) : null),
+  const isWeekly = goalType === "weekly";
+  const isDaily = goalType === "daily";
+  const createdAtLocalDate = useMemo(
+    () => toLocalDate(createdAt),
     [createdAt]
   );
-  const isWeekly = goalType === "weekly";
-  const createdAtLocalDate = useMemo(
-    () => (isWeekly ? toLocalDate(createdAt) : null),
-    [createdAt, isWeekly]
-  );
+  const todayLocal = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia(SINGLE_COLUMN_QUERY);
@@ -83,12 +91,14 @@ export default function Heatmap({
     };
   }, []);
 
-  const formatHoverDate = (iso) =>
-    new Date(iso).toLocaleDateString(undefined, {
+  const formatHoverDate = (iso) => {
+    const parsed = isDaily ? toLocalDate(iso) || new Date(iso) : new Date(iso);
+    return parsed.toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
+  };
 
   const handleEnter = (day) => {
     if (hoverTimeoutRef.current) {
@@ -139,14 +149,18 @@ export default function Heatmap({
     const extended = Array.from({ length: totalDays }, (_, idxFromEnd) => {
       const date = new Date(latestDate);
       date.setDate(latestDate.getDate() - (totalDays - 1 - idxFromEnd));
-      const iso = date.toISOString().slice(0, 10);
+      const iso = isWeekly
+        ? date.toISOString().slice(0, 10)
+        : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}-${String(date.getDate()).padStart(2, "0")}`;
       const existing = days.find((d) => d.iso === iso);
-      const isBeforeWeeklyStart = createdAtLocalDate
-        ? date < createdAtLocalDate
-        : false;
+      const isBeforeStart = createdAtLocalDate ? date < createdAtLocalDate : false;
+      const isBeforeWeeklyStart = isWeekly && isBeforeStart;
       const completed = isWeekly
         ? !isBeforeWeeklyStart && completionMap.has(iso)
-        : completionMap.has(iso);
+        : !isBeforeStart && completionMap.has(iso);
       return (
         existing || {
           iso,
@@ -158,8 +172,8 @@ export default function Heatmap({
           isOffDay:
             isWeekly
               ? !isBeforeWeeklyStart && !completed
-              : !(createdAtDate && date < createdAtDate) &&
-                !isActiveDay(date, normalizedActiveDays),
+              : !isBeforeStart &&
+                !isActiveDayLocal(date, normalizedActiveDays),
         }
       );
     });
@@ -167,12 +181,13 @@ export default function Heatmap({
     return extended;
   }, [
     availableWidth,
-    createdAtDate,
     createdAtLocalDate,
     days,
     isSingleColumn,
+    isDaily,
     isWeekly,
     normalizedActiveDays,
+    todayLocal,
   ]);
 
   return (
@@ -190,17 +205,36 @@ export default function Heatmap({
             onMouseEnter={() => handleEnter(day)}
             onMouseLeave={handleLeave}
           >
-            <div
-              className="h-[15px] w-[15px] rounded-sm border border-slate-200 max-[360px]:h-[13px] max-[360px]:w-[13px]"
-              style={{
-                backgroundColor: day.completed
-                  ? color || "#10b981"
-                  : day.isOffDay
-                  ? OFF_DAY_COLOR
-                  : "rgba(148, 163, 184, 0.25)",
-              }}
-              title={formatHoverDate(day.iso)}
-            />
+            {(() => {
+              const dayDate = toLocalDate(day.iso) || new Date(day.iso);
+              const isBeforeStart = createdAtLocalDate
+                ? dayDate < createdAtLocalDate
+                : false;
+              const isFuture = dayDate > todayLocal;
+              const isMissed =
+                isDaily &&
+                !isBeforeStart &&
+                !isFuture &&
+                !day.completed &&
+                !day.isOffDay &&
+                isActiveDayLocal(dayDate, normalizedActiveDays);
+              const backgroundColor = isBeforeStart || isFuture
+                ? "rgba(148, 163, 184, 0.25)"
+                : day.completed
+                ? color || "#10b981"
+                : day.isOffDay
+                ? OFF_DAY_COLOR
+                : isMissed
+                ? MISSED_DAY_COLOR
+                : "rgba(148, 163, 184, 0.25)";
+              return (
+                <div
+                  className="h-[15px] w-[15px] rounded-sm border border-slate-200 max-[360px]:h-[13px] max-[360px]:w-[13px]"
+                  style={{ backgroundColor }}
+                  title={formatHoverDate(day.iso)}
+                />
+              );
+            })()}
             {hoveredDay?.iso === day.iso ? (
               <div className="pointer-events-none absolute left-1/2 top-[-26px] z-10 -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-md">
                 {formatHoverDate(day.iso)}
