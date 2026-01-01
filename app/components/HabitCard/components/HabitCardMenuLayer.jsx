@@ -75,7 +75,7 @@ export default function HabitCardMenuLayer({
 
   const handleCardClick = (event) => {
     if (event.target.closest("[data-habit-heatmap='true']")) return;
-    if (event.target.closest("[data-weekly-progress='true']")) return;
+    if (event.target.closest("[data-habit-progress='true']")) return;
     if (event.target.closest("input[type='checkbox']")) return;
     openMenu(event);
   };

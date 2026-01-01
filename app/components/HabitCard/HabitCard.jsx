@@ -4,10 +4,27 @@ import { useRef } from "react";
 import CardHeader from "./components/CardHeader";
 import HabitCardMenuLayer from "./components/HabitCardMenuLayer";
 import Heatmap from "./components/Heatmap";
-import MetricsGrid from "./components/MetricsGrid";
+import MetricsGrid from "./components/metricsGrid/MetricGrid";
 import { useHabitMetrics } from "./hooks/useHabitMetrics";
-import { countCheckInsLast7Days } from "../../lib/habitScheduleUtils";
+import {
+  countCheckInsLast7Days,
+  countCheckInsOnLocalDate,
+  getLastActiveDailyDate,
+} from "../../lib/habitScheduleUtils";
 import { getWeeklyProgressShade } from "../../lib/habitTheme";
+
+const toLocalDate = (value) => {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+      const [_, year, month, day] = match;
+      return new Date(Number(year), Number(month) - 1, Number(day));
+    }
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
 
 export default function HabitCard({
   habit,
@@ -34,17 +51,34 @@ export default function HabitCard({
     : habit.themeColor;
   const weeklyIsAtTarget = isWeekly && weeklyCurrentCount === weeklyTargetCount;
   const weeklyIsComplete = isWeekly && weeklyCurrentCount >= weeklyTargetCount;
+  const dailyTargetCount = Math.max(1, habit.timesPerDay || 1);
+  const createdAtLocalDate = toLocalDate(habit.createdAt);
+  let dailyReferenceDate = getLastActiveDailyDate(habit);
+  if (createdAtLocalDate && dailyReferenceDate < createdAtLocalDate) {
+    dailyReferenceDate = createdAtLocalDate;
+  }
+  const dailyCurrentCount = !isWeekly
+    ? countCheckInsOnLocalDate(habit.checkIns || [], dailyReferenceDate)
+    : 0;
+  const dailyClampedPercent = !isWeekly
+    ? Math.min((dailyCurrentCount / dailyTargetCount) * 100, 100)
+    : 0;
+  const dailyIsAtTarget = !isWeekly && dailyCurrentCount === dailyTargetCount;
+  const isCompletedNow = isWeekly ? isCompletedToday : dailyIsAtTarget;
+  const handleDailyCheckIn = () => {
+    onComplete?.(habit.id, true);
+  };
 
   return (
     <HabitCardMenuLayer
       habit={habit}
       onDelete={onDelete}
       onComplete={onComplete}
-      isCompletedToday={isCompletedToday}
+      isCompletedToday={isCompletedNow}
       goalType={habit.goalType}
       cardRef={internalRef}
     >
-      {({ handleCardClick, handleToggleComplete, menuContent }) => (
+      {({ handleCardClick, menuContent }) => (
         <div
           ref={(node) => {
             internalRef.current = node;
@@ -64,15 +98,15 @@ export default function HabitCard({
         >
           <div
             className={` pt-0 relative flex h-full w-full flex-col origin-center transition-transform ${
-              isCompletedToday
+              isCompletedNow
                 ? "scale-[0.97] group-hover:scale-100"
                 : "scale-100"
             }`}
           >
             <CardHeader
               name={habit.name}
-              isCompletedToday={isCompletedToday}
-              onToggleComplete={isWeekly ? null : handleToggleComplete}
+              isCompletedToday={isCompletedNow}
+              onToggleComplete={isWeekly ? null : null}
               goalType={habit.goalType}
               onOpenMenu={handleCardClick}
               weeklyProgress={
@@ -81,8 +115,19 @@ export default function HabitCard({
                       percent: weeklyClampedPercent,
                       count: weeklyCurrentCount,
                       shade: weeklyProgressShade,
-                      isAtTarget: weeklyIsAtTarget,
+                      showCheckmark: weeklyIsAtTarget,
                       onIncrement: () => onWeeklyCheckIn?.(habit),
+                    }
+                  : null
+              }
+              dailyProgress={
+                !isWeekly
+                  ? {
+                      percent: dailyClampedPercent,
+                      count: dailyCurrentCount,
+                      shade: habit.themeColor,
+                      showCheckmark: dailyIsAtTarget,
+                      onIncrement: handleDailyCheckIn,
                     }
                   : null
               }
