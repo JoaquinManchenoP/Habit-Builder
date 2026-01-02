@@ -2,11 +2,11 @@
 
 export default function HomeCalendar({ weekDays }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:gap-0">
       {weekDays.map((day, index) => (
         <div
           key={`${day}-${index}`}
-          className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold ${
+          className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold sm:h-8 sm:w-8 sm:text-[11px] ${
             index === 5
               ? "border border-[color:var(--app-accent)] text-slate-900"
               : index === 6
