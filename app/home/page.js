@@ -79,8 +79,8 @@ export default function HomePage() {
   const weeklyList = useMemo(() => weeklyHabits, [weeklyHabits]);
 
   return (
-    <div className="-mx-6 -mt-6 min-h-screen bg-slate-50 px-6 py-10 text-slate-900">
-      <div className="mx-auto w-[40vw] space-y-8">
+    <div className="-mx-4 -mt-6 min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:-mx-6 sm:px-6">
+      <div className="mx-auto space-y-8 lg:w-[55vw] md:w-4/6 sm:w-full ">
         <HomeCalendar weekDays={WEEK_DAYS} />
         <div className="space-y-4">
           <MainCircularProgress progress={TODAY_PROGRESS} />
