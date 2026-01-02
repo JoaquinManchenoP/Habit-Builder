@@ -34,7 +34,7 @@ export default function HabitsList({
           return (b.createdAt || "").localeCompare(a.createdAt || "");
         })
         .map((habit) => (
-          <div key={habit.id} className="w-auto">
+          <div key={habit.id} className="w-full">
             <HabitCard
               habit={habit}
               onComplete={onComplete}

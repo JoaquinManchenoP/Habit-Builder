@@ -1,6 +1,6 @@
 import { normalizeActiveDays } from "../../../lib/habitSchedule";
 
-const DAYS_TO_SHOW = 120;
+const DAYS_TO_SHOW = 250;
 
 const toLocalDate = (value) => {
   if (!value) return null;
