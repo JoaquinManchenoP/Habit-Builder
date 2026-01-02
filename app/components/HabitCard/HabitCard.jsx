@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import CardHeader from "./components/CardHeader";
 import HabitCardMenuLayer from "./components/HabitCardMenuLayer";
-import Heatmap from "./components/Heatmap";
+import Heatmap from "./components/heatmap/Heatmap";
 import MetricsGrid from "./components/metricsGrid/MetricGrid";
 import { useHabitMetrics } from "./hooks/useHabitMetrics";
 import {
