@@ -196,7 +196,11 @@ export default function HabitCard({
               </div>
             </div>
           </div>
-          {weeklyIsComplete ? (
+          {isWeekly ? (
+            weeklyIsComplete ? (
+              <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
+            ) : null
+          ) : dailyIsAtTarget ? (
             <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
           ) : null}
           {menuContent}
