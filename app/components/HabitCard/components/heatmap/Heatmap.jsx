@@ -3,15 +3,15 @@ import MonthLabels from "./MonthLabels";
 import WeekdayLabels from "./WeekdayLabels";
 import { normalizeActiveDays } from "../../../../lib/habitSchedule";
 
-const MEDIUM_DAYS_COUNT = 201;
-const SMALLER_DAYS_COUNT = 124;
-const SMALL_DAYS_COUNT = 222;
-const LARGE_DAYS_COUNT = 124;
+const MEDIUM_DAYS_COUNT = 202;
+const SMALLER_DAYS_COUNT = 125;
+const SMALL_DAYS_COUNT = 223;
+const LARGE_DAYS_COUNT = 125;
 const MEDIUM_SCREEN_QUERY = "(max-width: 1135px)";
 const SMALLER_SCREEN_QUERY = "(max-width: 750px)";
 const SMALL_SCREEN_QUERY = "(max-width: 1247px)";
 const OFF_DAY_COLOR = "rgba(51, 73, 78, 0.35)";
-const MISSED_DAY_COLOR = "#ef4444";
+const MISSED_DAY_COLOR = "#fca5a5";
 
 const toLocalDate = (value) => {
   if (!value) return null;

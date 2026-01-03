@@ -14,10 +14,10 @@ export default function WeekleyHabitCard({
   return (
     <div
       onClick={() => onIncrement(habit)}
-      className="relative flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+      className="relative flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
     >
       {isCompleteWeek ? (
-        <div className="pointer-events-none absolute inset-0 z-20 rounded-2xl bg-slate-900/30" />
+        <div className="pointer-events-none absolute inset-0 z-20 rounded-xl bg-slate-900/30" />
       ) : null}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm">

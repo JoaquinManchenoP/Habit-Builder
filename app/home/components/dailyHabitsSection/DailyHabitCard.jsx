@@ -5,6 +5,7 @@ import {
   countCheckInsOnLocalDate,
   getLastActiveDailyDate,
 } from "../../../lib/habitScheduleUtils";
+import { getWeeklyProgressShade } from "../../../lib/habitTheme";
 
 const toLocalDate = (value) => {
   if (!value) return null;
@@ -32,12 +33,12 @@ export default function DailyHabitCard({ habit, onIncrement }) {
   );
   const progressPercent = Math.min((todayCount / targetPerDay) * 100, 100);
   const showCheckmark = todayCount === targetPerDay;
-  const color = habit.themeColor || habit.color;
+  const color = getWeeklyProgressShade(progressPercent);
 
   return (
     <div
       onClick={() => onIncrement?.(habit)}
-      className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+      className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
     >
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm">
