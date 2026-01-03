@@ -140,14 +140,17 @@ export default function Navbar() {
           ))}
         </nav>
       </header>
-      <aside className="hidden w-56 shrink-0 flex-col gap-6 lg:flex">
-        <Link href="/home" className="flex items-center gap-3 text-sm font-semibold text-slate-800">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+      <aside className="hidden w-60 shrink-0 flex-col gap-8 lg:flex">
+        <Link
+          href="/home"
+          className="flex items-center gap-3 text-xl font-semibold tracking-tight text-slate-800"
+        >
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
             <span className="text-base font-bold text-slate-800">HB</span>
           </span>
           <span className="leading-tight">Habit Builder</span>
         </Link>
-        <nav className="flex flex-col gap-2 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
+        <nav className="flex flex-col gap-4 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -156,16 +159,16 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
+                className={`flex items-center gap-4 rounded-xl px-5 py-3.5 text-sm font-semibold transition ${
                   isActive
-                    ? "bg-amber-100 text-slate-900 shadow-sm"
+                    ? "bg-amber-100 text-slate-900 shadow-lg"
                     : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
                 }`}
               >
                 <span
-                  className={`grid h-10 w-10 place-items-center rounded-2xl border ${
+                  className={`grid h-9 w-9 place-items-center rounded-xl border ${
                     isActive
-                    ? "border-[color:var(--app-accent-dark)] bg-[color:var(--app-accent-dark)] text-slate-900"
+                      ? "border-[color:var(--app-accent-dark)] bg-[color:var(--app-accent-dark)] text-slate-900"
                       : "border-slate-200 bg-white text-slate-600"
                   }`}
                 >

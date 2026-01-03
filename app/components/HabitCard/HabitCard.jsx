@@ -67,6 +67,10 @@ export default function HabitCard({
   const dailyClampedPercent = !isWeekly
     ? Math.min((dailyCurrentCount / dailyTargetCount) * 100, 100)
     : 0;
+  const dailyProgressShade = !isWeekly
+    ? getWeeklyProgressShade(dailyClampedPercent)
+    : habit.themeColor;
+  const progressShade = isWeekly ? weeklyProgressShade : dailyProgressShade;
   const dailyIsAtTarget = !isWeekly && dailyCurrentCount === dailyTargetCount;
   const isCompletedNow = isWeekly ? isCompletedToday : dailyIsAtTarget;
   const handleDailyCheckIn = () => {
@@ -129,7 +133,7 @@ export default function HabitCard({
             }
           }}
           onClick={handleCardClick}
-          className={`group relative grid h-[370px] w-full min-w-0 grid-rows-[2fr_4fr_4fr] rounded-2xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition
+          className={`group relative grid h-[370px] w-full min-w-0 grid-rows-[2fr_4fr_4fr] rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition
             max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[360px]:pt-1 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5 ${
               isFading
                 ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
@@ -167,7 +171,7 @@ export default function HabitCard({
                     ? {
                         percent: dailyClampedPercent,
                         count: dailyCurrentCount,
-                        shade: habit.themeColor,
+                        shade: dailyProgressShade,
                         showCheckmark: dailyIsAtTarget,
                         onIncrement: handleDailyCheckIn,
                       }
@@ -178,22 +182,22 @@ export default function HabitCard({
                 <MetricsGrid
                   metrics={metrics}
                   consistencyPercent={consistencyPercent}
-                  color={weeklyProgressShade}
+                  color={progressShade}
                 />
               </div>
               <div className="mt-0">
-              <Heatmap
-                days={days}
-                color={weeklyProgressShade}
-                activeDays={habit.activeDays}
-                createdAt={habit.createdAt}
-                goalType={habit.goalType}
-              />
+                <Heatmap
+                  days={days}
+                  color={progressShade}
+                  activeDays={habit.activeDays}
+                  createdAt={habit.createdAt}
+                  goalType={habit.goalType}
+                />
               </div>
             </div>
           </div>
           {weeklyIsComplete ? (
-            <div className="pointer-events-none absolute inset-0 z-30 rounded-2xl bg-slate-900/30" />
+            <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
           ) : null}
           {menuContent}
         </div>

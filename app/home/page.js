@@ -15,14 +15,6 @@ import HomeCalendar from "./components/HomeCalendar";
 
 const WEEK_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 
-const TODAY_PROGRESS = {
-  percent: 50,
-  label: "Eat vegetables",
-  subtitle: "Goal: 2 servings",
-  color: "#ffcd1f",
-  count: 1,
-};
-
 export default function HomePage() {
   const [todayHabits, setTodayHabits] = useState([]);
   const [weeklyHabits, setWeeklyHabits] = useState([]);
@@ -34,7 +26,7 @@ export default function HomePage() {
       setTodayHabits(
         habits.filter(
           (habit) =>
-            habit.goalType !== "weekly" && isHabitActiveToday(habit, today)
+            habit.goalType === "daily" && isHabitActiveToday(habit, today)
         )
       );
       setWeeklyHabits(habits.filter((habit) => habit.goalType === "weekly"));
@@ -51,7 +43,7 @@ export default function HomePage() {
     setTodayHabits(
       habits.filter(
         (habit) =>
-          habit.goalType !== "weekly" && isHabitActiveToday(habit, today)
+          habit.goalType === "daily" && isHabitActiveToday(habit, today)
       )
     );
     setWeeklyHabits(habits.filter((habit) => habit.goalType === "weekly"));
@@ -83,7 +75,7 @@ export default function HomePage() {
       <div className="mx-auto space-y-8 lg:w-[55vw] md:w-4/6 sm:w-full ">
         <HomeCalendar weekDays={WEEK_DAYS} />
         <div className="space-y-4">
-          <MainCircularProgress progress={TODAY_PROGRESS} />
+          <MainCircularProgress todayList={todayList} />
           <DailyHabitsSection
             todayList={todayList}
             onIncrement={handleDailyIncrement}
