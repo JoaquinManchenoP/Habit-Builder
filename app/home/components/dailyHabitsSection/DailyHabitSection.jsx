@@ -2,7 +2,11 @@
 
 import DailyHabitCard from "./DailyHabitCard";
 
-export default function DailyHabitsSection({ todayList, onIncrement }) {
+export default function DailyHabitsSection({
+  todayList,
+  onIncrement,
+  onMenuOpen,
+}) {
   return todayList.length ? (
     <div className="flex flex-col gap-3 mt-13 lg:mt-15 md:mt-15 sm:mt-13">
       {todayList.map((habit) => (
@@ -10,6 +14,7 @@ export default function DailyHabitsSection({ todayList, onIncrement }) {
           key={habit.id}
           habit={habit}
           onIncrement={onIncrement}
+          onMenuOpen={onMenuOpen}
         />
       ))}
     </div>

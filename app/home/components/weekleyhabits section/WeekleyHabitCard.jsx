@@ -10,11 +10,12 @@ export default function WeekleyHabitCard({
   isAtTarget,
   isCompleteWeek,
   onIncrement,
+  onMenuOpen,
 }) {
   return (
     <div
       onClick={() => onIncrement(habit)}
-      className="relative flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+      className="group relative flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
     >
       {isCompleteWeek ? (
         <div className="pointer-events-none absolute inset-0 z-20 rounded-xl bg-slate-900/30" />
@@ -35,7 +36,7 @@ export default function WeekleyHabitCard({
           <p className="text-xs text-slate-500">Weekly goal</p>
         </div>
       </div>
-      <div className="shrink-0 scale-[0.9]">
+      <div className="flex shrink-0 items-center gap-2">
         <CircularProgress
           percent={progressPercent}
           value={currentCount}
@@ -43,6 +44,26 @@ export default function WeekleyHabitCard({
           showCheckmark={isAtTarget}
           useCompletionColor={false}
         />
+        <button
+          type="button"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+          onClick={(event) => {
+            event.stopPropagation();
+            onMenuOpen?.(habit, event);
+          }}
+          aria-label="Open habit menu"
+        >
+          <svg
+            viewBox="0 0 20 20"
+            className="h-4 w-4"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <circle cx="10" cy="4" r="1.6" />
+            <circle cx="10" cy="10" r="1.6" />
+            <circle cx="10" cy="16" r="1.6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
