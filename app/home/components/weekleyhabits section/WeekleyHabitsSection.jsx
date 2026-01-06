@@ -4,7 +4,11 @@ import { countCheckInsLast7Days } from "../../../lib/habitScheduleUtils";
 import { getWeeklyProgressShade } from "../../../lib/habitTheme";
 import WeekleyHabitCard from "./WeekleyHabitCard";
 
-export default function WeekleyHabitsSection({ weeklyList, onIncrement }) {
+export default function WeekleyHabitsSection({
+  weeklyList,
+  onIncrement,
+  onMenuOpen,
+}) {
   return (
     <div className="space-y-4 ">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
@@ -33,6 +37,7 @@ export default function WeekleyHabitsSection({ weeklyList, onIncrement }) {
                 isAtTarget={isAtTarget}
                 isCompleteWeek={isCompleteWeek}
                 onIncrement={onIncrement}
+                onMenuOpen={onMenuOpen}
               />
             );
           })

@@ -20,7 +20,7 @@ const toLocalDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-export default function DailyHabitCard({ habit, onIncrement }) {
+export default function DailyHabitCard({ habit, onIncrement, onMenuOpen }) {
   const targetPerDay = Math.max(1, habit.timesPerDay || 1);
   const createdAtLocalDate = toLocalDate(habit.createdAt);
   let referenceDate = getLastActiveDailyDate(habit);
@@ -32,13 +32,14 @@ export default function DailyHabitCard({ habit, onIncrement }) {
     referenceDate
   );
   const progressPercent = Math.min((todayCount / targetPerDay) * 100, 100);
-  const showCheckmark = todayCount === targetPerDay;
+  const isAtTargetOrAbove = todayCount >= targetPerDay;
+  const isCompletedForCurrentDailyWindow = isAtTargetOrAbove;
   const color = getWeeklyProgressShade(progressPercent);
 
   return (
     <div
       onClick={() => onIncrement?.(habit)}
-      className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+      className="group relative flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
     >
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm">
@@ -56,15 +57,38 @@ export default function DailyHabitCard({ habit, onIncrement }) {
           <p className="text-xs text-slate-500">Daily goal</p>
         </div>
       </div>
-      <div className="shrink-0 scale-[0.9]">
+      <div className="flex shrink-0 items-center gap-2">
         <CircularProgress
           percent={progressPercent}
           value={todayCount}
           color={color}
-          showCheckmark={showCheckmark}
+          showCheckmark={false}
           useCompletionColor={false}
         />
+        <button
+          type="button"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+          onClick={(event) => {
+            event.stopPropagation();
+            onMenuOpen?.(habit, event);
+          }}
+          aria-label="Open habit menu"
+        >
+          <svg
+            viewBox="0 0 20 20"
+            className="h-4 w-4"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <circle cx="10" cy="4" r="1.6" />
+            <circle cx="10" cy="10" r="1.6" />
+            <circle cx="10" cy="16" r="1.6" />
+          </svg>
+        </button>
       </div>
+      {isCompletedForCurrentDailyWindow ? (
+        <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
+      ) : null}
     </div>
   );
 }
