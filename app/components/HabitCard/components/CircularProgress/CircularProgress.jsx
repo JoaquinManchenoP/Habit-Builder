@@ -50,9 +50,12 @@ export default function CircularProgress({
   showCheckmark = true,
   useCompletionColor = true,
   completionColor = "#22c55e",
+  animate = true,
 }) {
   const safePercent = Math.max(0, Math.min(100, percent || 0));
-  const initialValue = Number.isFinite(value) ? value : safePercent;
+  const initialValue = Math.round(
+    Number.isFinite(value) ? value : safePercent
+  );
   const [displayValue, setDisplayValue] = useState(initialValue);
   const displayValueRef = useRef(initialValue);
   const gradientId = useId();
@@ -75,6 +78,12 @@ export default function CircularProgress({
 
   useEffect(() => {
     const endValue = Number.isFinite(value) ? value : safePercent;
+    if (!animate) {
+      const roundedValue = Math.round(endValue);
+      displayValueRef.current = roundedValue;
+      setDisplayValue(roundedValue);
+      return;
+    }
     const startValue = displayValueRef.current;
     const duration = 900;
     if (startValue === endValue) return;
@@ -101,7 +110,7 @@ export default function CircularProgress({
 
     frameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameId);
-  }, [safePercent, value]);
+  }, [animate, safePercent, value]);
 
   return (
     <div className="relative h-[68px] w-[68px]">
@@ -111,12 +120,20 @@ export default function CircularProgress({
             <stop
               offset="0%"
               stopColor={startColor}
-              style={{ transition: "stop-color 400ms ease-in-out" }}
+              style={
+                animate
+                  ? { transition: "stop-color 400ms ease-in-out" }
+                  : undefined
+              }
             />
             <stop
               offset="100%"
               stopColor={endColor}
-              style={{ transition: "stop-color 400ms ease-in-out" }}
+              style={
+                animate
+                  ? { transition: "stop-color 400ms ease-in-out" }
+                  : undefined
+              }
             />
           </linearGradient>
           <filter id={shadowId} x="-20%" y="-20%" width="140%" height="140%">
@@ -140,7 +157,9 @@ export default function CircularProgress({
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
-          style={{ transition: "stroke-dashoffset 900ms ease-in-out" }}
+          style={
+            animate ? { transition: "stroke-dashoffset 900ms ease-in-out" } : undefined
+          }
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">

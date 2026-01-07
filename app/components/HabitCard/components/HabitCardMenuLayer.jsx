@@ -1,7 +1,6 @@
 "use client";
 
 import CardMenu from "./CardMenu";
-import CompletionOverlay from "./CompletionOverlay";
 import EditHabitModal from "./EditHabitModal";
 import PreviousCheckInModal from "./PreviousCheckInModal";
 import { useHabitActions } from "../hooks/useHabitActions";
@@ -61,16 +60,13 @@ export default function HabitCardMenuLayer({
   });
 
   const menuContent = (
-    <>
-      {isCompletedToday && goalType !== "weekly" ? <CompletionOverlay /> : null}
-      <CardMenu
-        menu={menu}
-        onClose={closeMenu}
-        onAddPreviousCheckIn={handleOpenPreviousCheckIn}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    </>
+    <CardMenu
+      menu={menu}
+      onClose={closeMenu}
+      onAddPreviousCheckIn={handleOpenPreviousCheckIn}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+    />
   );
 
   const handleCardClick = (event) => {
