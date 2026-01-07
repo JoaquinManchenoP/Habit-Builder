@@ -1,11 +1,24 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CircularProgress from "../../components/HabitCard/components/CircularProgress/CircularProgress";
 import { countCheckInsOnLocalDate } from "../../lib/habitScheduleUtils";
 import { getWeeklyProgressShade } from "../../lib/habitTheme";
 
+let hasAnimatedMainProgress = false;
+
 export default function MainCircularProgress({ todayList }) {
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+
+  useEffect(() => {
+    if (!hasAnimatedMainProgress) {
+      hasAnimatedMainProgress = true;
+      setShouldAnimate(true);
+    } else {
+      setShouldAnimate(false);
+    }
+  }, []);
+
   const progressPercent = useMemo(() => {
     const today = new Date();
     const totals = (todayList || []).reduce(
@@ -39,6 +52,7 @@ export default function MainCircularProgress({ todayList }) {
             showPercent
             color={progressColor}
             useCompletionColor={false}
+            animate={shouldAnimate}
           />
         </div>
       </div>

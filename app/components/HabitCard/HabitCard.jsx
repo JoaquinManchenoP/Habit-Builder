@@ -64,15 +64,19 @@ export default function HabitCard({
   const dailyCurrentCount = !isWeekly
     ? countCheckInsOnLocalDate(habit.checkIns || [], dailyReferenceDate)
     : 0;
+  const dailyEffectiveCount = !isWeekly
+    ? Math.min(dailyCurrentCount, dailyTargetCount)
+    : 0;
   const dailyClampedPercent = !isWeekly
-    ? Math.min((dailyCurrentCount / dailyTargetCount) * 100, 100)
+    ? Math.min((dailyEffectiveCount / dailyTargetCount) * 100, 100)
     : 0;
   const dailyProgressShade = !isWeekly
     ? getWeeklyProgressShade(dailyClampedPercent)
     : habit.themeColor;
   const progressShade = isWeekly ? weeklyProgressShade : dailyProgressShade;
-  const dailyIsAtTarget = !isWeekly && dailyCurrentCount === dailyTargetCount;
+  const dailyIsAtTarget = !isWeekly && dailyCurrentCount >= dailyTargetCount;
   const isCompletedNow = isWeekly ? isCompletedToday : dailyIsAtTarget;
+  const shouldShowCover = isWeekly ? weeklyIsComplete : dailyIsAtTarget;
   const handleDailyCheckIn = () => {
     onComplete?.(habit.id, true);
   };
@@ -172,7 +176,7 @@ export default function HabitCard({
                         percent: dailyClampedPercent,
                         count: dailyCurrentCount,
                         shade: dailyProgressShade,
-                        showCheckmark: dailyIsAtTarget,
+                        showCheckmark: false,
                         onIncrement: handleDailyCheckIn,
                       }
                     : null
@@ -196,11 +200,7 @@ export default function HabitCard({
               </div>
             </div>
           </div>
-          {isWeekly ? (
-            weeklyIsComplete ? (
-              <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
-            ) : null
-          ) : dailyIsAtTarget ? (
+          {shouldShowCover ? (
             <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
           ) : null}
           {menuContent}
