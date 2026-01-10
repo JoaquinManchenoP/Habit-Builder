@@ -1,6 +1,7 @@
 "use client";
 
-import HabitCard from "../../components/HabitCard/HabitCard";
+import DailyHabitCardHabitsPage from "./DailyHabitCardHabitsPage";
+import WeeklyHabitCardHabitsPage from "./WeeklyHabitCardHabitsPage";
 
 export default function HabitsList({
   habits,
@@ -33,27 +34,33 @@ export default function HabitsList({
           if (aStamp !== bStamp) return bStamp - aStamp;
           return (b.createdAt || "").localeCompare(a.createdAt || "");
         })
-        .map((habit) => (
-          <div key={habit.id} className="w-full">
-            <HabitCard
-              habit={habit}
-              onComplete={onComplete}
-              onWeeklyCheckIn={onWeeklyCheckIn}
-              onDelete={onDeleteRequest}
-              isCompletedToday={habit.completions?.includes(
-                new Date().toISOString().slice(0, 10)
-              )}
-              isFading={fadeTargetId === habit.id}
-              cardRef={(node) => {
-                if (node) {
-                  cardRefs.current[habit.id] = node;
-                } else {
-                  delete cardRefs.current[habit.id];
-                }
-              }}
-            />
-          </div>
-        ))}
+        .map((habit) => {
+          const CardComponent =
+            habit.goalType === "weekly"
+              ? WeeklyHabitCardHabitsPage
+              : DailyHabitCardHabitsPage;
+          return (
+            <div key={habit.id} className="w-full">
+              <CardComponent
+                habit={habit}
+                onComplete={onComplete}
+                onWeeklyCheckIn={onWeeklyCheckIn}
+                onDelete={onDeleteRequest}
+                isCompletedToday={habit.completions?.includes(
+                  new Date().toISOString().slice(0, 10)
+                )}
+                isFading={fadeTargetId === habit.id}
+                cardRef={(node) => {
+                  if (node) {
+                    cardRefs.current[habit.id] = node;
+                  } else {
+                    delete cardRefs.current[habit.id];
+                  }
+                }}
+              />
+            </div>
+          );
+        })}
     </div>
   );
 }

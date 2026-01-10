@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import MobileTopNav from "./MobileTopNav";
 
 const NAV_ITEMS = [
   {
@@ -124,22 +125,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
-        <Link href="/home" className="text-lg font-bold text-slate-900">
-          Habit Builder
-        </Link>
-        <nav className="flex items-center gap-4 text-sm font-medium text-slate-700">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="hover:text-[color:var(--app-accent-dark)]"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </header>
+      <MobileTopNav items={NAV_ITEMS} />
       <aside className="hidden w-60 shrink-0 flex-col gap-8 lg:flex">
         <Link
           href="/home"
