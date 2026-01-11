@@ -35,6 +35,10 @@ export default function HabitCardMenuLayer({
     setEditName,
     editActiveDays,
     setEditActiveDays,
+    editTarget,
+    setEditTarget,
+    editTargetError,
+    setEditTargetError,
     openEditModal,
     closeEditModal,
   } = useHabitEditModal();
@@ -57,6 +61,8 @@ export default function HabitCardMenuLayer({
     closeEditModal,
     onEditNameChange: setEditName,
     onEditActiveDaysChange: setEditActiveDays,
+    onEditTargetChange: setEditTarget,
+    onEditTargetError: setEditTargetError,
   });
 
   const menuContent = (
@@ -96,10 +102,17 @@ export default function HabitCardMenuLayer({
         visible={isEditVisible}
         nameValue={editName}
         activeDaysValue={editActiveDays}
+        goalType={goalType}
+        targetValue={editTarget}
+        targetError={editTargetError}
         onChangeName={setEditName}
         onChangeActiveDay={(dayKey, nextValue) =>
           setEditActiveDays((prev) => ({ ...prev, [dayKey]: nextValue }))
         }
+        onChangeTarget={(value) => {
+          setEditTarget(value);
+          if (editTargetError) setEditTargetError("");
+        }}
         onSave={handleSaveEdit}
         onClose={closeEditModal}
       />
