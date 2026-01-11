@@ -44,6 +44,7 @@
   --app-accent-dark: #ffcd1f;
   --app-border: rgba(51, 73, 78, 0.12);
   --app-text-muted: rgba(51, 73, 78, 0.7);
+  --mobile-topnav-offset: 0px;
 
   --shadow-sm: 0 6px 16px rgba(51, 73, 78, 0.08);
   --shadow-md: 0 16px 32px rgba(51, 73, 78, 0.12);

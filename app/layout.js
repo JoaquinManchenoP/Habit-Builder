@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
       <body
         className="antialiased overflow-y-scroll"
       >
-        <main className="min-h-screen bg-slate-50">
+        <main className="min-h-screen bg-slate-50 pt-[var(--mobile-topnav-offset)] lg:pt-0">
           <PageContainer>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
               <Navbar />
