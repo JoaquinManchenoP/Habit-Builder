@@ -23,6 +23,7 @@ export default function WeeklyHabitCardHabitsPage({
   const [contentScale, setContentScale] = useState(1);
   const [availableWidth, setAvailableWidth] = useState(null);
   const [contentWidth, setContentWidth] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { days, metrics, consistencyPercent } = useHabitMetrics(habit);
   const weeklyTargetCount = Math.max(1, habit.timesPerWeek || 1);
@@ -92,7 +93,11 @@ export default function WeeklyHabitCardHabitsPage({
             }
           }}
           onClick={handleCardClick}
-          className={`group relative grid h-[370px] w-full min-w-0 grid-rows-[2fr_4fr_4fr] rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition
+          className={`group relative grid w-full min-w-0 rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition ${
+            isCollapsed
+              ? "h-auto grid-rows-[auto]"
+              : "h-[370px] grid-rows-[2fr_4fr_4fr]"
+          }
             max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[360px]:pt-1 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5 ${
               isFading
                 ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
@@ -114,6 +119,8 @@ export default function WeeklyHabitCardHabitsPage({
                 onToggleComplete={null}
                 goalType={habit.goalType}
                 onOpenMenu={handleCardClick}
+                isCollapsed={isCollapsed}
+                onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
                 weeklyProgress={{
                   percent: weeklyClampedPercent,
                   count: weeklyCurrentCount,
@@ -123,25 +130,29 @@ export default function WeeklyHabitCardHabitsPage({
                 }}
                 dailyProgress={null}
               />
-              <div className="mt-0">
-                <MetricsGrid
-                  metrics={metrics}
-                  consistencyPercent={consistencyPercent}
-                  color={weeklyProgressShade}
-                />
-              </div>
-              <div className="mt-0">
-                <Heatmap
-                  days={days}
-                  color={weeklyProgressShade}
-                  activeDays={habit.activeDays}
-                  createdAt={habit.createdAt}
-                  goalType={habit.goalType}
-                />
-              </div>
+              {!isCollapsed ? (
+                <>
+                  <div className="mt-0">
+                    <MetricsGrid
+                      metrics={metrics}
+                      consistencyPercent={consistencyPercent}
+                      color={weeklyProgressShade}
+                    />
+                  </div>
+                  <div className="mt-0">
+                    <Heatmap
+                      days={days}
+                      color={weeklyProgressShade}
+                      activeDays={habit.activeDays}
+                      createdAt={habit.createdAt}
+                      goalType={habit.goalType}
+                    />
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
-          {weeklyIsComplete ? (
+          {!isCollapsed && weeklyIsComplete ? (
             <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
           ) : null}
           {menuContent}

@@ -9,6 +9,8 @@ import { useHabitMetrics } from "../../components/HabitCard/hooks/useHabitMetric
 import {
   countCheckInsOnLocalDate,
   getLastActiveDailyDate,
+  getStartOfWeekLocal,
+  toLocalISODate,
 } from "../../lib/habitScheduleUtils";
 import { getWeeklyProgressShade } from "../../lib/habitTheme";
 
@@ -25,6 +27,49 @@ const toLocalDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const getWeeklyTargetCount = (habit) => {
+  if (!habit) return 0;
+  if (habit.goalType === "weekly") {
+    return Math.max(1, habit.timesPerWeek || 1);
+  }
+  const timesPerDay = Math.max(1, habit.timesPerDay || 1);
+  const activeDaysCount = habit.activeDays
+    ? Object.values(habit.activeDays).filter(Boolean).length
+    : 7;
+  return timesPerDay * Math.max(1, activeDaysCount);
+};
+
+const getWeeklyCheckInStreak = (habit) => {
+  const checkIns = Array.isArray(habit?.checkIns) ? habit.checkIns : [];
+  if (!checkIns.length) return 0;
+  const weeklyTarget = getWeeklyTargetCount(habit);
+  if (!weeklyTarget) return 0;
+  const counts = new Map();
+  checkIns.forEach((timestamp) => {
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return;
+    const weekStart = getStartOfWeekLocal(date);
+    const key = toLocalISODate(weekStart);
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  const today = new Date();
+  const createdAtDate = habit?.createdAt ? new Date(habit.createdAt) : null;
+  const startWeek = createdAtDate ? getStartOfWeekLocal(createdAtDate) : null;
+  const cursor = getStartOfWeekLocal(today);
+  let streak = 0;
+  while (!startWeek || cursor >= startWeek) {
+    const key = toLocalISODate(cursor);
+    const count = counts.get(key) || 0;
+    if (count >= weeklyTarget) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 7);
+    } else {
+      break;
+    }
+  }
+  return streak;
+};
+
 export default function DailyHabitCardHabitsPage({
   habit,
   onDelete,
@@ -39,8 +84,20 @@ export default function DailyHabitCardHabitsPage({
   const [contentScale, setContentScale] = useState(1);
   const [availableWidth, setAvailableWidth] = useState(null);
   const [contentWidth, setContentWidth] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { days, metrics, consistencyPercent } = useHabitMetrics(habit);
+  const weeklyStreakValue = getWeeklyCheckInStreak(habit);
+  const weeklyStreakUnit = weeklyStreakValue === 1 ? "week" : "weeks";
+  const adjustedMetrics = metrics.map((metric) =>
+    metric.title === "Streak"
+      ? {
+          ...metric,
+          value: `${weeklyStreakValue}`,
+          subtitle: weeklyStreakUnit,
+        }
+      : metric
+  );
   const dailyTargetCount = Math.max(1, habit.timesPerDay || 1);
   const createdAtLocalDate = toLocalDate(habit.createdAt);
   let dailyReferenceDate = getLastActiveDailyDate(habit);
@@ -57,6 +114,7 @@ export default function DailyHabitCardHabitsPage({
     100
   );
   const dailyProgressShade = getWeeklyProgressShade(dailyClampedPercent);
+  const completionShade = getWeeklyProgressShade(100);
   const dailyIsAtTarget = dailyCurrentCount >= dailyTargetCount;
   const isCompletedNow = dailyIsAtTarget;
   const handleDailyCheckIn = () => {
@@ -119,7 +177,11 @@ export default function DailyHabitCardHabitsPage({
             }
           }}
           onClick={handleCardClick}
-          className={`group relative grid h-[370px] w-full min-w-0 grid-rows-[2fr_4fr_4fr] rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition
+          className={`group relative grid w-full min-w-0 rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition ${
+            isCollapsed
+              ? "h-auto grid-rows-[auto]"
+              : "h-[370px] grid-rows-[2fr_4fr_4fr]"
+          }
             max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[360px]:pt-1 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5 ${
               isFading
                 ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
@@ -141,6 +203,8 @@ export default function DailyHabitCardHabitsPage({
                 onToggleComplete={null}
                 goalType={habit.goalType}
                 onOpenMenu={handleCardClick}
+                isCollapsed={isCollapsed}
+                onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
                 weeklyProgress={null}
                 dailyProgress={{
                   percent: dailyClampedPercent,
@@ -150,25 +214,30 @@ export default function DailyHabitCardHabitsPage({
                   onIncrement: handleDailyCheckIn,
                 }}
               />
-              <div className="mt-0">
-                <MetricsGrid
-                  metrics={metrics}
-                  consistencyPercent={consistencyPercent}
-                  color={dailyProgressShade}
-                />
-              </div>
-              <div className="mt-0">
-                <Heatmap
-                  days={days}
-                  color={dailyProgressShade}
-                  activeDays={habit.activeDays}
-                  createdAt={habit.createdAt}
-                  goalType={habit.goalType}
-                />
-              </div>
+              {!isCollapsed ? (
+                <>
+                  <div className="mt-0">
+                    <MetricsGrid
+                      metrics={adjustedMetrics}
+                      consistencyPercent={consistencyPercent}
+                      color={dailyProgressShade}
+                      completionColor={completionShade}
+                    />
+                  </div>
+                  <div className="mt-0">
+                    <Heatmap
+                      days={days}
+                      color={dailyProgressShade}
+                      activeDays={habit.activeDays}
+                      createdAt={habit.createdAt}
+                      goalType={habit.goalType}
+                    />
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
-          {dailyIsAtTarget ? (
+          {!isCollapsed && dailyIsAtTarget ? (
             <div className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-slate-900/30" />
           ) : null}
           {menuContent}

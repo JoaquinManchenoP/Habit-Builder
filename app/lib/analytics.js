@@ -58,7 +58,27 @@ const buildMockHabits = (today = new Date()) => {
     new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())),
   );
   const iso = (offset) => toISODate(addDays(weekAnchor, offset));
+  const stampFromIso = (isoDate) => {
+    const [year, month, day] = isoDate.split("-").map(Number);
+    return new Date(year, month - 1, day, 12).toISOString();
+  };
   const dailyThemeColor = getThemeColorForGoalType("daily");
+  const weeklyThemeColor = getThemeColorForGoalType("weekly");
+  const weeklyCheckInOffsets = [
+    -21,
+    -19,
+    -17,
+    -14,
+    -12,
+    -10,
+    -7,
+    -5,
+    -3,
+    0,
+    2,
+    4,
+  ];
+  const weeklyCheckInDates = weeklyCheckInOffsets.map((offset) => iso(offset));
 
   return [
     {
@@ -246,6 +266,20 @@ const buildMockHabits = (today = new Date()) => {
         iso(-1),
         iso(0),
       ],
+    },
+    {
+      id: "mock-weekly-1",
+      name: "Weekly Stretch",
+      createdAt: iso(-28),
+      createdAtTimestamp: Date.parse(iso(-28)),
+      isMock: true,
+      goalType: "weekly",
+      themeColor: weeklyThemeColor,
+      timesPerDay: undefined,
+      timesPerWeek: 3,
+      activeDays: DEFAULT_ACTIVE_DAYS,
+      checkIns: weeklyCheckInDates.map((date) => stampFromIso(date)),
+      completions: weeklyCheckInDates,
     },
   ];
 };

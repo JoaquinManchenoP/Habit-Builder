@@ -9,6 +9,8 @@ export default function CardHeader({
   goalType,
   weeklyProgress,
   dailyProgress,
+  isCollapsed = false,
+  onToggleCollapse,
 }) {
   const habitTypeLabel = goalType === "weekly" ? "Weekly" : "Daily";
   const isWeekly = goalType === "weekly";
@@ -20,6 +22,32 @@ export default function CardHeader({
     >
       <div>
         <div className="flex items-center gap-2">
+          {typeof onToggleCollapse === "function" ? (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleCollapse();
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+              aria-label={isCollapsed ? "Expand habit card" : "Collapse habit card"}
+            >
+              <svg
+                viewBox="0 0 20 20"
+                className={`h-4 w-4 transition-transform ${
+                  isCollapsed ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 8l5 5 5-5" />
+              </svg>
+            </button>
+          ) : null}
           <p className=" text-lg font-semibold text-slate-900 max-[360px]:text-sm flex ">
             {name}
           </p>

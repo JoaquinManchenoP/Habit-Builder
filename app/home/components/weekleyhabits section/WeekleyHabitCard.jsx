@@ -1,6 +1,7 @@
 "use client";
 
 import CircularProgress from "../../../components/HabitCard/components/CircularProgress/CircularProgress";
+import { getWeeklyProgressShade } from "../../../lib/habitTheme";
 
 export default function WeekleyHabitCard({
   habit,
@@ -12,6 +13,7 @@ export default function WeekleyHabitCard({
   onIncrement,
   onMenuOpen,
 }) {
+  const completionShade = getWeeklyProgressShade(100);
   return (
     <div
       onClick={() => onIncrement(habit)}
@@ -43,6 +45,7 @@ export default function WeekleyHabitCard({
           color={progressShade}
           showCheckmark={isAtTarget}
           useCompletionColor={false}
+          completionColor={completionShade}
         />
         <button
           type="button"
