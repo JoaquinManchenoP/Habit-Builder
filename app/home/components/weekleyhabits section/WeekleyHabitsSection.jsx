@@ -1,12 +1,13 @@
 "use client";
 
 import { countCheckInsLast7Days } from "../../../lib/habitScheduleUtils";
-import { getWeeklyProgressShade } from "../../../lib/habitTheme";
+import { getProgressColor } from "../../../lib/progressColor";
 import WeekleyHabitCard from "./WeekleyHabitCard";
 
 export default function WeekleyHabitsSection({
   weeklyList,
   onIncrement,
+  onDecrement,
   onMenuOpen,
 }) {
   return (
@@ -24,7 +25,7 @@ export default function WeekleyHabitsSection({
               100
             );
             const progressPercent = clampedPercent;
-            const progressShade = getWeeklyProgressShade(clampedPercent);
+            const progressShade = getProgressColor(clampedPercent);
             const isAtTarget = currentCount === targetCount;
             const isCompleteWeek = currentCount >= targetCount;
             return (
@@ -37,6 +38,7 @@ export default function WeekleyHabitsSection({
                 isAtTarget={isAtTarget}
                 isCompleteWeek={isCompleteWeek}
                 onIncrement={onIncrement}
+                onDecrement={onDecrement}
                 onMenuOpen={onMenuOpen}
               />
             );

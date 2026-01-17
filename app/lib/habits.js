@@ -6,6 +6,8 @@ import {
   getDefaultUserId,
   getHabitsByUserId,
   removeLastCompletion as removeLastCompletionRecord,
+  removeLastCheckIn as removeLastCheckInRecord,
+  removeTodayCheckIn as removeTodayCheckInRecord,
   updateHabit as updateHabitRecord,
 } from "./mockDb";
 import { DEFAULT_ACTIVE_DAYS } from "./habitSchedule";
@@ -43,6 +45,14 @@ export function addWeeklyHabitCheckIn(id, timestamp = null) {
 
 export function removeLastCompletion(id) {
   return removeLastCompletionRecord(id);
+}
+
+export function removeLastCheckIn(id) {
+  return removeLastCheckInRecord(id);
+}
+
+export function removeTodayCheckIn(id) {
+  return removeTodayCheckInRecord(id);
 }
 
 export function updateHabitDetails(id, updates = {}) {

@@ -20,7 +20,7 @@ export default function HabitsList({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 justify-items-center sm:gap-4 min-[1125px]:[grid-template-columns:repeat(auto-fit,minmax(460px,1fr))] min-[1125px]:justify-items-center min-[1125px]:gap-5">
+    <div className="columns-1 gap-x-3 sm:gap-x-4 min-[1125px]:columns-[460px] min-[1125px]:gap-x-5">
       {[...habits]
         .sort((a, b) => {
           const aStamp =
@@ -40,7 +40,10 @@ export default function HabitsList({
               ? WeeklyHabitCardHabitsPage
               : DailyHabitCardHabitsPage;
           return (
-            <div key={habit.id} className="w-full">
+            <div
+              key={habit.id}
+              className="mb-3 w-full break-inside-avoid sm:mb-4 min-[1125px]:mb-5"
+            >
               <CardComponent
                 habit={habit}
                 onComplete={onComplete}

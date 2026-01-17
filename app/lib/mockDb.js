@@ -70,6 +70,21 @@ const toLocalDateFromISO = (isoDate) => {
   return new Date(Number(year), Number(month) - 1, Number(day), 12);
 };
 
+const getCompletionKeyForCheckIn = (goalType, isoTimestamp) => {
+  const date = new Date(isoTimestamp);
+  if (Number.isNaN(date.getTime())) return null;
+  return goalType === "weekly"
+    ? date.toISOString().slice(0, 10)
+    : toLocalISODate(date);
+};
+
+const getTodayCompletionKey = (goalType) => {
+  const now = new Date();
+  return goalType === "weekly"
+    ? now.toISOString().slice(0, 10)
+    : toLocalISODate(now);
+};
+
 const readUserHabits = () => {
   const storage = getStorage();
   if (!storage) return [];
@@ -259,6 +274,79 @@ export const removeLastCompletion = (habitId) => {
   return updated;
 };
 
+export const removeLastCheckIn = (habitId) => {
+  const habits = readUserHabits();
+  const updated = habits.map((habit) => {
+    if (habit.id !== habitId) return habit;
+    const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+    if (checkIns.length === 0) return habit;
+    const removedTimestamp = checkIns[checkIns.length - 1];
+    const nextCheckIns = checkIns.slice(0, -1);
+    const completionKey = getCompletionKeyForCheckIn(
+      habit.goalType,
+      removedTimestamp
+    );
+    if (!completionKey) {
+      return { ...habit, checkIns: nextCheckIns };
+    }
+    const stillHasDay = nextCheckIns.some((timestamp) => {
+      const key = getCompletionKeyForCheckIn(habit.goalType, timestamp);
+      return key === completionKey;
+    });
+    const completions = Array.isArray(habit.completions)
+      ? habit.completions
+      : [];
+    const nextCompletions = stillHasDay
+      ? completions
+      : completions.filter((iso) => iso !== completionKey);
+    return {
+      ...habit,
+      checkIns: nextCheckIns,
+      completions: nextCompletions,
+    };
+  });
+  persistUserHabits(updated);
+  return updated;
+};
+
+export const removeTodayCheckIn = (habitId) => {
+  const habits = readUserHabits();
+  const updated = habits.map((habit) => {
+    if (habit.id !== habitId) return habit;
+    const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+    if (checkIns.length === 0) return habit;
+    const targetKey = getTodayCompletionKey(habit.goalType);
+    let removed = false;
+    const nextCheckIns = checkIns.filter((timestamp) => {
+      if (removed) return true;
+      const key = getCompletionKeyForCheckIn(habit.goalType, timestamp);
+      if (key === targetKey) {
+        removed = true;
+        return false;
+      }
+      return true;
+    });
+    if (!removed) return habit;
+    const stillHasDay = nextCheckIns.some((timestamp) => {
+      const key = getCompletionKeyForCheckIn(habit.goalType, timestamp);
+      return key === targetKey;
+    });
+    const completions = Array.isArray(habit.completions)
+      ? habit.completions
+      : [];
+    const nextCompletions = stillHasDay
+      ? completions
+      : completions.filter((iso) => iso !== targetKey);
+    return {
+      ...habit,
+      checkIns: nextCheckIns,
+      completions: nextCompletions,
+    };
+  });
+  persistUserHabits(updated);
+  return updated;
+};
+
 export const getMockHabits = () =>
   getSessionMockHabits().map((habit) => ({ ...habit, isMock: true }));
 
@@ -383,6 +471,77 @@ export const removeMockLastCompletion = (habitId) => {
         return true;
       });
       return { ...habit, completions };
+    })
+  );
+};
+
+export const removeMockLastCheckIn = (habitId) => {
+  return setSessionMockHabits(
+    getSessionMockHabits().map((habit) => {
+      if (habit.id !== habitId) return habit;
+      const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+      if (checkIns.length === 0) return habit;
+      const removedTimestamp = checkIns[checkIns.length - 1];
+      const nextCheckIns = checkIns.slice(0, -1);
+      const completionKey = getCompletionKeyForCheckIn(
+        habit.goalType,
+        removedTimestamp
+      );
+      if (!completionKey) {
+        return { ...habit, checkIns: nextCheckIns };
+      }
+      const stillHasDay = nextCheckIns.some((timestamp) => {
+        const key = getCompletionKeyForCheckIn(habit.goalType, timestamp);
+        return key === completionKey;
+      });
+      const completions = Array.isArray(habit.completions)
+        ? habit.completions
+        : [];
+      const nextCompletions = stillHasDay
+        ? completions
+        : completions.filter((iso) => iso !== completionKey);
+      return {
+        ...habit,
+        checkIns: nextCheckIns,
+        completions: nextCompletions,
+      };
+    })
+  );
+};
+
+export const removeMockTodayCheckIn = (habitId) => {
+  return setSessionMockHabits(
+    getSessionMockHabits().map((habit) => {
+      if (habit.id !== habitId) return habit;
+      const checkIns = Array.isArray(habit.checkIns) ? habit.checkIns : [];
+      if (checkIns.length === 0) return habit;
+      const targetKey = getTodayCompletionKey(habit.goalType);
+      let removed = false;
+      const nextCheckIns = checkIns.filter((timestamp) => {
+        if (removed) return true;
+        const key = getCompletionKeyForCheckIn(habit.goalType, timestamp);
+        if (key === targetKey) {
+          removed = true;
+          return false;
+        }
+        return true;
+      });
+      if (!removed) return habit;
+      const stillHasDay = nextCheckIns.some((timestamp) => {
+        const key = getCompletionKeyForCheckIn(habit.goalType, timestamp);
+        return key === targetKey;
+      });
+      const completions = Array.isArray(habit.completions)
+        ? habit.completions
+        : [];
+      const nextCompletions = stillHasDay
+        ? completions
+        : completions.filter((iso) => iso !== targetKey);
+      return {
+        ...habit,
+        checkIns: nextCheckIns,
+        completions: nextCompletions,
+      };
     })
   );
 };

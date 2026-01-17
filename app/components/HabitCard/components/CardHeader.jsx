@@ -1,5 +1,5 @@
 import CompletionToggle from "./CompletionToggle";
-import CircularProgress from "./CircularProgress/CircularProgress";
+import ProgressControls from "./ProgressControls";
 
 export default function CardHeader({
   name,
@@ -30,7 +30,9 @@ export default function CardHeader({
                 onToggleCollapse();
               }}
               className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
-              aria-label={isCollapsed ? "Expand habit card" : "Collapse habit card"}
+              aria-label={
+                isCollapsed ? "Expand habit card" : "Collapse habit card"
+              }
             >
               <svg
                 viewBox="0 0 20 20"
@@ -56,24 +58,9 @@ export default function CardHeader({
           </span>
         </div>
       </div>
-      <div className="mr-6 flex gap-2 max-[360px]:mr-4 max-[360px]:gap-1.5">
+      <div className="mr-2 flex gap-2 max-[360px]:mr-4 max-[360px]:gap-1.5">
         {progress ? (
-          <div
-            data-habit-progress="true"
-            onClick={(event) => {
-              event.stopPropagation();
-              progress.onIncrement?.();
-            }}
-            className="scale-[0.85]"
-          >
-            <CircularProgress
-              percent={progress.percent}
-              value={progress.count}
-              color={progress.shade}
-              showCheckmark={progress.showCheckmark}
-              useCompletionColor={false}
-            />
-          </div>
+          <ProgressControls progress={progress} />
         ) : onToggleComplete ? (
           <CompletionToggle
             checked={isCompletedToday}

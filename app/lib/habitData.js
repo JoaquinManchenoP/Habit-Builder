@@ -7,6 +7,8 @@ import {
   getHabitsByUserId,
   getMockHabits,
   removeMockLastCompletion,
+  removeMockLastCheckIn,
+  removeMockTodayCheckIn,
   updateMockHabitDetails,
   updateMockHabitName,
 } from "./mockDb";
@@ -20,6 +22,10 @@ export const addMockWeeklyHabitCheckIn = (id, timestamp = null) =>
   addMockWeeklyCheckIn(id, timestamp);
 
 export const removeMockHabitLastCompletion = (id) => removeMockLastCompletion(id);
+
+export const removeMockHabitLastCheckIn = (id) => removeMockLastCheckIn(id);
+
+export const removeMockHabitTodayCheckIn = (id) => removeMockTodayCheckIn(id);
 
 export const loadHabitsWithMock = () => {
   const userHabits = getHabitsByUserId(getDefaultUserId()).map((habit) => ({

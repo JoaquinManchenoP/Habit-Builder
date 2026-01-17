@@ -5,6 +5,7 @@ import DailyHabitCard from "./DailyHabitCard";
 export default function DailyHabitsSection({
   todayList,
   onIncrement,
+  onDecrement,
   onMenuOpen,
 }) {
   return todayList.length ? (
@@ -14,6 +15,7 @@ export default function DailyHabitsSection({
           key={habit.id}
           habit={habit}
           onIncrement={onIncrement}
+          onDecrement={onDecrement}
           onMenuOpen={onMenuOpen}
         />
       ))}

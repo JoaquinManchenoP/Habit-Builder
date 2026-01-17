@@ -122,7 +122,7 @@ export default function CircularProgress({
               stopColor={startColor}
               style={
                 animate
-                  ? { transition: "stop-color 400ms ease-in-out" }
+                  ? { transition: "stop-color 250ms ease" }
                   : undefined
               }
             />
@@ -131,7 +131,7 @@ export default function CircularProgress({
               stopColor={endColor}
               style={
                 animate
-                  ? { transition: "stop-color 400ms ease-in-out" }
+                  ? { transition: "stop-color 250ms ease" }
                   : undefined
               }
             />
@@ -158,7 +158,9 @@ export default function CircularProgress({
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
           style={
-            animate ? { transition: "stroke-dashoffset 900ms ease-in-out" } : undefined
+            animate
+              ? { transition: "stroke-dashoffset 900ms ease-in-out" }
+              : undefined
           }
         />
       </svg>

@@ -10,12 +10,14 @@ import {
   deleteMockHabit,
   loadHabitsWithMock,
   markMockHabitCompleted,
+  removeMockHabitTodayCheckIn,
   updateMockHabitDetails,
 } from "../lib/habitData";
 import {
   addWeeklyHabitCheckIn,
   deleteHabit,
   markHabitCompleted,
+  removeTodayCheckIn,
   updateHabitDetails,
 } from "../lib/habits";
 import { isHabitActiveToday } from "../lib/habitScheduleUtils";
@@ -87,6 +89,24 @@ export default function HomePage() {
       markMockHabitCompleted(habit.id);
     } else {
       markHabitCompleted(habit.id);
+    }
+    refreshHabits();
+  };
+
+  const handleWeeklyDecrement = (habit) => {
+    if (habit.isMock) {
+      removeMockHabitTodayCheckIn(habit.id);
+    } else {
+      removeTodayCheckIn(habit.id);
+    }
+    refreshHabits();
+  };
+
+  const handleDailyDecrement = (habit) => {
+    if (habit.isMock) {
+      removeMockHabitTodayCheckIn(habit.id);
+    } else {
+      removeTodayCheckIn(habit.id);
     }
     refreshHabits();
   };
@@ -190,12 +210,14 @@ export default function HomePage() {
           <DailyHabitsSection
             todayList={todayList}
             onIncrement={handleDailyIncrement}
+            onDecrement={handleDailyDecrement}
             onMenuOpen={handleMenuOpen}
           />
         </div>
         <WeekleyHabitsSection
           weeklyList={weeklyList}
           onIncrement={handleWeeklyIncrement}
+          onDecrement={handleWeeklyDecrement}
           onMenuOpen={handleMenuOpen}
         />
         <CardMenu
