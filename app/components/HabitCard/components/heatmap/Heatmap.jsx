@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import MonthLabels from "./MonthLabels";
 import WeekdayLabels from "./WeekdayLabels";
 import { normalizeActiveDays } from "../../../../lib/habitSchedule";
+import { getProgressColor } from "../../../../lib/progressColor";
 
 const MEDIUM_DAYS_COUNT = 180;
 const SMALLER_DAYS_COUNT = 100;
@@ -69,6 +70,17 @@ export default function Heatmap({
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }, []);
+  const todayIso = useMemo(
+    () =>
+      isWeekly
+        ? new Date().toISOString().slice(0, 10)
+        : toLocalISODate(todayLocal),
+    [isWeekly, todayLocal]
+  );
+  const lockedCompletionColor = useMemo(
+    () => getProgressColor(100),
+    []
+  );
 
   useEffect(() => {
     const mq = window.matchMedia(MEDIUM_SCREEN_QUERY);
@@ -95,11 +107,15 @@ export default function Heatmap({
   }, []);
 
   const formatHoverDate = (iso) => {
-    const parsed = isDaily ? toLocalDate(iso) || new Date(iso) : new Date(iso);
-    return parsed.toLocaleDateString(undefined, {
+    const match = iso?.match?.(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const parsed = match
+      ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])))
+      : new Date(iso);
+    return parsed.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
+      timeZone: "UTC",
     });
   };
 
@@ -196,11 +212,14 @@ export default function Heatmap({
                       !day.completed &&
                       !day.isOffDay &&
                       isActiveDayLocal(dayDate, normalizedActiveDays);
+                    const isToday = day.iso === todayIso;
                     const backgroundColor =
                       isBeforeStart || isFuture
                         ? "rgba(148, 163, 184, 0.25)"
                         : day.completed
-                        ? color || "#10b981"
+                        ? isToday
+                          ? color || lockedCompletionColor
+                          : lockedCompletionColor
                         : day.isOffDay
                         ? OFF_DAY_COLOR
                         : isMissed
@@ -209,7 +228,10 @@ export default function Heatmap({
                     return (
                       <div
                         className="h-[14px] w-[14px] rounded-sm border border-slate-200 max-[360px]:h-[8px] max-[360px]:w-[8px]"
-                        style={{ backgroundColor }}
+                        style={{
+                          backgroundColor,
+                          transition: "background-color 250ms ease",
+                        }}
                         title={formatHoverDate(day.iso)}
                       />
                     );
@@ -223,6 +245,31 @@ export default function Heatmap({
               );
             });
           })()}
+        </div>
+      </div>
+      <div className="flex w-full justify-end">
+        <div className="flex items-center gap-3 text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+          <span className="flex items-center gap-1">
+            <span
+              className="h-2 w-2 rounded-sm border border-slate-200"
+              style={{ backgroundColor: lockedCompletionColor }}
+            />
+            Done
+          </span>
+          <span className="flex items-center gap-1">
+            <span
+              className="h-2 w-2 rounded-sm border border-slate-200"
+              style={{ backgroundColor: MISSED_DAY_COLOR }}
+            />
+            Missed
+          </span>
+          <span className="flex items-center gap-1">
+            <span
+              className="h-2 w-2 rounded-sm border border-slate-200"
+              style={{ backgroundColor: OFF_DAY_COLOR }}
+            />
+            Off
+          </span>
         </div>
       </div>
     </div>

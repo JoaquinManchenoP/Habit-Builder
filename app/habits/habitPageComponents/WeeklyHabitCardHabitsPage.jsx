@@ -7,7 +7,7 @@ import Heatmap from "../../components/HabitCard/components/heatmap/Heatmap";
 import MetricsGrid from "../../components/HabitCard/components/metricsGrid/MetricGrid";
 import { useHabitMetrics } from "../../components/HabitCard/hooks/useHabitMetrics";
 import { countCheckInsLast7Days } from "../../lib/habitScheduleUtils";
-import { getWeeklyProgressShade } from "../../lib/habitTheme";
+import { getProgressColor } from "../../lib/progressColor";
 
 export default function WeeklyHabitCardHabitsPage({
   habit,
@@ -32,7 +32,7 @@ export default function WeeklyHabitCardHabitsPage({
     (weeklyCurrentCount / weeklyTargetCount) * 100,
     100
   );
-  const weeklyProgressShade = getWeeklyProgressShade(weeklyClampedPercent);
+  const weeklyProgressShade = getProgressColor(weeklyClampedPercent);
   const weeklyIsAtTarget = weeklyCurrentCount === weeklyTargetCount;
   const weeklyIsComplete = weeklyCurrentCount >= weeklyTargetCount;
   const isCompletedNow = isCompletedToday;
@@ -82,7 +82,16 @@ export default function WeeklyHabitCardHabitsPage({
       goalType={habit.goalType}
       cardRef={internalRef}
     >
-      {({ handleCardClick, menuContent }) => (
+      {({ handleCardClick, menuContent }) => {
+        const handleCardToggle = (event) => {
+          if (isCollapsed) {
+            event.stopPropagation();
+            setIsCollapsed(false);
+            return;
+          }
+          handleCardClick(event);
+        };
+        return (
         <div
           ref={(node) => {
             internalRef.current = node;
@@ -92,13 +101,12 @@ export default function WeeklyHabitCardHabitsPage({
               cardRef.current = node;
             }
           }}
-          onClick={handleCardClick}
+          onClick={handleCardToggle}
           className={`group relative grid w-full min-w-0 rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition ${
             isCollapsed
-              ? "h-auto grid-rows-[auto]"
-              : "h-[370px] grid-rows-[2fr_4fr_4fr]"
-          }
-            max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[360px]:pt-1 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5 ${
+              ? "h-auto grid-rows-[auto] items-center"
+              : "h-[380px] grid-rows-[2fr_4fr_4fr] max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[360px]:pt-1 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5"
+          } ${
               isFading
                 ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
                 : "opacity-100 transform hover:scale-[1.01] active:scale-[0.99]"
@@ -110,7 +118,7 @@ export default function WeeklyHabitCardHabitsPage({
                 isCompletedNow
                   ? "scale-[0.97] group-hover:scale-100"
                   : "scale-100"
-              }`}
+              } ${isCollapsed ? "justify-center" : ""}`}
               ref={contentRef}
             >
               <CardHeader
@@ -118,7 +126,7 @@ export default function WeeklyHabitCardHabitsPage({
                 isCompletedToday={isCompletedNow}
                 onToggleComplete={null}
                 goalType={habit.goalType}
-                onOpenMenu={handleCardClick}
+                onOpenMenu={handleCardToggle}
                 isCollapsed={isCollapsed}
                 onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
                 weeklyProgress={{
@@ -127,29 +135,34 @@ export default function WeeklyHabitCardHabitsPage({
                   shade: weeklyProgressShade,
                   showCheckmark: weeklyIsAtTarget,
                   onIncrement: () => onWeeklyCheckIn?.(habit),
+                  onDecrement: () => onComplete?.(habit.id, false),
                 }}
                 dailyProgress={null}
               />
-              {!isCollapsed ? (
-                <>
-                  <div className="mt-0">
-                    <MetricsGrid
-                      metrics={metrics}
-                      consistencyPercent={consistencyPercent}
-                      color={weeklyProgressShade}
-                    />
-                  </div>
-                  <div className="mt-0">
-                    <Heatmap
-                      days={days}
-                      color={weeklyProgressShade}
-                      activeDays={habit.activeDays}
-                      createdAt={habit.createdAt}
-                      goalType={habit.goalType}
-                    />
-                  </div>
-                </>
-              ) : null}
+              <div
+                className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+                  isCollapsed
+                    ? "max-h-0 opacity-0 pointer-events-none"
+                    : "max-h-[1000px] opacity-100"
+                }`}
+              >
+                <div className="mt-0">
+                  <MetricsGrid
+                    metrics={metrics}
+                    consistencyPercent={consistencyPercent}
+                    color={weeklyProgressShade}
+                  />
+                </div>
+                <div className="mt-0">
+                  <Heatmap
+                    days={days}
+                    color={weeklyProgressShade}
+                    activeDays={habit.activeDays}
+                    createdAt={habit.createdAt}
+                    goalType={habit.goalType}
+                  />
+                </div>
+              </div>
             </div>
           </div>
           {!isCollapsed && weeklyIsComplete ? (
@@ -157,7 +170,8 @@ export default function WeeklyHabitCardHabitsPage({
           ) : null}
           {menuContent}
         </div>
-      )}
+      );
+      }}
     </HabitCardMenuLayer>
   );
 }

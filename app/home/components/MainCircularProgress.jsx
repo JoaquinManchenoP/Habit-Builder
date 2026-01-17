@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import CircularProgress from "../../components/HabitCard/components/CircularProgress/CircularProgress";
 import { countCheckInsOnLocalDate } from "../../lib/habitScheduleUtils";
-import { getWeeklyProgressShade } from "../../lib/habitTheme";
+import { getProgressColor } from "../../lib/progressColor";
 
 let hasAnimatedMainProgress = false;
 
@@ -39,7 +39,7 @@ export default function MainCircularProgress({ todayList }) {
     if (totals.required === 0) return 0;
     return (totals.completed / totals.required) * 100;
   }, [todayList]);
-  const progressColor = getWeeklyProgressShade(progressPercent);
+  const progressColor = getProgressColor(progressPercent);
 
   return (
     <>

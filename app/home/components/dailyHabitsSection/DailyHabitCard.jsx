@@ -1,11 +1,11 @@
 "use client";
 
-import CircularProgress from "../../../components/HabitCard/components/CircularProgress/CircularProgress";
+import ProgressControls from "../../../components/HabitCard/components/ProgressControls";
 import {
   countCheckInsOnLocalDate,
   getLastActiveDailyDate,
 } from "../../../lib/habitScheduleUtils";
-import { getWeeklyProgressShade } from "../../../lib/habitTheme";
+import { getProgressColor } from "../../../lib/progressColor";
 
 const toLocalDate = (value) => {
   if (!value) return null;
@@ -20,7 +20,12 @@ const toLocalDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-export default function DailyHabitCard({ habit, onIncrement, onMenuOpen }) {
+export default function DailyHabitCard({
+  habit,
+  onIncrement,
+  onDecrement,
+  onMenuOpen,
+}) {
   const targetPerDay = Math.max(1, habit.timesPerDay || 1);
   const createdAtLocalDate = toLocalDate(habit.createdAt);
   let referenceDate = getLastActiveDailyDate(habit);
@@ -34,7 +39,7 @@ export default function DailyHabitCard({ habit, onIncrement, onMenuOpen }) {
   const progressPercent = Math.min((todayCount / targetPerDay) * 100, 100);
   const isAtTargetOrAbove = todayCount >= targetPerDay;
   const isCompletedForCurrentDailyWindow = isAtTargetOrAbove;
-  const color = getWeeklyProgressShade(progressPercent);
+  const color = getProgressColor(progressPercent);
 
   return (
     <div
@@ -58,12 +63,15 @@ export default function DailyHabitCard({ habit, onIncrement, onMenuOpen }) {
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <CircularProgress
-          percent={progressPercent}
-          value={todayCount}
-          color={color}
-          showCheckmark={false}
-          useCompletionColor={false}
+        <ProgressControls
+          progress={{
+            percent: progressPercent,
+            count: todayCount,
+            shade: color,
+            showCheckmark: false,
+            onIncrement: () => onIncrement?.(habit),
+            onDecrement: () => onDecrement?.(habit),
+          }}
         />
         <button
           type="button"

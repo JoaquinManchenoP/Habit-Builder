@@ -2,20 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import DeleteConfirmationModal from "../components/HabitCard/components/DeleteConfirmationModal";
-import HabitsList from "./Habit Page Components/HabitsList";
-import PageHeader from "./Habit Page Components/page-header/PageHeader";
+import HabitsList from "./habitPageComponents/HabitsList";
+import PageHeader from "./habitPageComponents/page-header/PageHeader";
 import {
   deleteHabit,
   addWeeklyHabitCheckIn,
   markHabitCompleted,
-  removeLastCompletion,
+  removeTodayCheckIn,
 } from "../lib/habits";
 import {
   deleteMockHabit,
   addMockWeeklyHabitCheckIn,
   loadHabitsWithMock,
   markMockHabitCompleted,
-  removeMockHabitLastCompletion,
+  removeMockHabitTodayCheckIn,
 } from "../lib/habitData";
 
 export default function HabitsPage() {
@@ -57,9 +57,9 @@ export default function HabitsPage() {
       }
     } else {
       if (habit.isMock) {
-        removeMockHabitLastCompletion(id);
+        removeMockHabitTodayCheckIn(id);
       } else {
-        removeLastCompletion(id);
+        removeTodayCheckIn(id);
       }
     }
 

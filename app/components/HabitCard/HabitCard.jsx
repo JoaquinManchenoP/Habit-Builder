@@ -11,7 +11,7 @@ import {
   countCheckInsOnLocalDate,
   getLastActiveDailyDate,
 } from "../../lib/habitScheduleUtils";
-import { getWeeklyProgressShade } from "../../lib/habitTheme";
+import { getProgressColor } from "../../lib/progressColor";
 
 const toLocalDate = (value) => {
   if (!value) return null;
@@ -51,7 +51,7 @@ export default function HabitCard({
     ? Math.min((weeklyCurrentCount / weeklyTargetCount) * 100, 100)
     : 0;
   const weeklyProgressShade = isWeekly
-    ? getWeeklyProgressShade(weeklyClampedPercent)
+    ? getProgressColor(weeklyClampedPercent)
     : habit.themeColor;
   const weeklyIsAtTarget = isWeekly && weeklyCurrentCount === weeklyTargetCount;
   const weeklyIsComplete = isWeekly && weeklyCurrentCount >= weeklyTargetCount;
@@ -71,7 +71,7 @@ export default function HabitCard({
     ? Math.min((dailyEffectiveCount / dailyTargetCount) * 100, 100)
     : 0;
   const dailyProgressShade = !isWeekly
-    ? getWeeklyProgressShade(dailyClampedPercent)
+    ? getProgressColor(dailyClampedPercent)
     : habit.themeColor;
   const progressShade = isWeekly ? weeklyProgressShade : dailyProgressShade;
   const dailyIsAtTarget = !isWeekly && dailyCurrentCount >= dailyTargetCount;
@@ -137,7 +137,7 @@ export default function HabitCard({
             }
           }}
           onClick={handleCardClick}
-          className={`group relative grid h-[370px] w-full min-w-0 grid-rows-[2fr_4fr_4fr] rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition
+          className={`group relative grid h-[380px] w-full min-w-0 grid-rows-[2fr_4fr_4fr] rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition
             max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[360px]:pt-1 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5 ${
               isFading
                 ? "pointer-events-none opacity-0 scale-95 transition-all duration-[400ms] ease-out"
@@ -167,6 +167,7 @@ export default function HabitCard({
                         shade: weeklyProgressShade,
                         showCheckmark: weeklyIsAtTarget,
                         onIncrement: () => onWeeklyCheckIn?.(habit),
+                        onDecrement: () => onComplete?.(habit.id, false),
                       }
                     : null
                 }
@@ -178,6 +179,7 @@ export default function HabitCard({
                         shade: dailyProgressShade,
                         showCheckmark: false,
                         onIncrement: handleDailyCheckIn,
+                        onDecrement: () => onComplete?.(habit.id, false),
                       }
                     : null
                 }

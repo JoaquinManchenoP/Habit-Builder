@@ -1,7 +1,7 @@
 "use client";
 
-import CircularProgress from "../../../components/HabitCard/components/CircularProgress/CircularProgress";
-import { getWeeklyProgressShade } from "../../../lib/habitTheme";
+import ProgressControls from "../../../components/HabitCard/components/ProgressControls";
+import { getProgressColor } from "../../../lib/progressColor";
 
 export default function WeekleyHabitCard({
   habit,
@@ -11,9 +11,10 @@ export default function WeekleyHabitCard({
   isAtTarget,
   isCompleteWeek,
   onIncrement,
+  onDecrement,
   onMenuOpen,
 }) {
-  const completionShade = getWeeklyProgressShade(100);
+  const completionShade = getProgressColor(100);
   return (
     <div
       onClick={() => onIncrement(habit)}
@@ -39,13 +40,16 @@ export default function WeekleyHabitCard({
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <CircularProgress
-          percent={progressPercent}
-          value={currentCount}
-          color={progressShade}
-          showCheckmark={isAtTarget}
-          useCompletionColor={false}
-          completionColor={completionShade}
+        <ProgressControls
+          progress={{
+            percent: progressPercent,
+            count: currentCount,
+            shade: progressShade,
+            showCheckmark: isAtTarget,
+            onIncrement: () => onIncrement?.(habit),
+            onDecrement: () => onDecrement?.(habit),
+            completionColor: completionShade,
+          }}
         />
         <button
           type="button"

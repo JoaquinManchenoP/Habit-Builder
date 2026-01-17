@@ -1,4 +1,4 @@
-import { getWeeklyProgressShade } from "../../../../lib/habitTheme";
+import { getProgressColor } from "../../../../lib/progressColor";
 import CheckInsMetricCard from "./CheckInsMetricCard";
 import ConsistencyMetricCard from "./ConsistencyMetricCard";
 import StreakMetricCard from "./StreakMetricCard";
@@ -10,7 +10,7 @@ export default function MetricsGrid({
   completionColor,
 }) {
   const visibleMetrics = metrics.filter((metric) => metric.title !== "Started");
-  const completionShade = completionColor || getWeeklyProgressShade(100);
+  const completionShade = completionColor || getProgressColor(100);
   return (
     <div className="flex items-center justify-center max-[360px]:mt-1">
       <div className="grid w-full grid-cols-3 gap-3 max-[360px]:gap-3">
@@ -18,7 +18,7 @@ export default function MetricsGrid({
           metric.title === "Consistency" ? (
             (() => {
               const clampedPercent = Math.min(consistencyPercent || 0, 100);
-              const shade = getWeeklyProgressShade(clampedPercent);
+              const shade = getProgressColor(clampedPercent);
               return (
                 <ConsistencyMetricCard
                   key={metric.title}
