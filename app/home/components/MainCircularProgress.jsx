@@ -5,19 +5,8 @@ import CircularProgress from "../../components/HabitCard/components/CircularProg
 import { countCheckInsOnLocalDate } from "../../lib/habitScheduleUtils";
 import { getProgressColor } from "../../lib/progressColor";
 
-let hasAnimatedMainProgress = false;
-
 export default function MainCircularProgress({ todayList }) {
   const [shouldAnimate, setShouldAnimate] = useState(false);
-
-  useEffect(() => {
-    if (!hasAnimatedMainProgress) {
-      hasAnimatedMainProgress = true;
-      setShouldAnimate(true);
-    } else {
-      setShouldAnimate(false);
-    }
-  }, []);
 
   const progressPercent = useMemo(() => {
     const today = new Date();
@@ -40,6 +29,10 @@ export default function MainCircularProgress({ todayList }) {
     return (totals.completed / totals.required) * 100;
   }, [todayList]);
   const progressColor = getProgressColor(progressPercent);
+
+  useEffect(() => {
+    setShouldAnimate(true);
+  }, [progressPercent]);
 
   return (
     <>
