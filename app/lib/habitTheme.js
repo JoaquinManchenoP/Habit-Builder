@@ -6,7 +6,7 @@ export const WEEKLY_SHADE_BRIGHT = "#00e676";
 export const WEEKLY_SHADE_NEON = "#00ff6a";
 export const PROGRESS_COLOR_LOW = "#ffe2b8";
 export const PROGRESS_COLOR_MIDLOW = "#ffb347";
-export const PROGRESS_COLOR_MIDHIGH = WEEKLY_SHADE_BRIGHT;
+export const PROGRESS_COLOR_MIDHIGH = "#86efac";
 export const PROGRESS_COLOR_HIGH = WEEKLY_SHADE_NEON;
 
 export const getThemeColorForGoalType = (goalType) =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { countCheckInsLast7Days } from "../../../lib/habitScheduleUtils";
+import { countCheckInsThisWeek } from "../../../lib/habitScheduleUtils";
 import { getProgressColor } from "../../../lib/progressColor";
 import WeekleyHabitCard from "./WeekleyHabitCard";
 
@@ -18,7 +18,7 @@ export default function WeekleyHabitsSection({
       <div className="space-y-3">
         {weeklyList.length ? (
           weeklyList.map((habit) => {
-            const currentCount = countCheckInsLast7Days(habit.checkIns);
+            const currentCount = countCheckInsThisWeek(habit.checkIns);
             const targetCount = Math.max(1, habit.timesPerWeek || 1);
             const clampedPercent = Math.min(
               (currentCount / targetCount) * 100,
