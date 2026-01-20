@@ -55,6 +55,7 @@ export default function Heatmap({
   goalType,
 }) {
   const containerRef = useRef(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [isMediumScreen, setIsMediumScreen] = useState(false);
   const [isSmallerScreen, setIsSmallerScreen] = useState(false);
   const [hoveredDay, setHoveredDay] = useState(null);
@@ -81,6 +82,10 @@ export default function Heatmap({
     () => getProgressColor(100),
     []
   );
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia(MEDIUM_SCREEN_QUERY);
@@ -148,6 +153,8 @@ export default function Heatmap({
     if (isMediumScreen) return days.slice(-MEDIUM_DAYS_COUNT);
     return days.slice(-LARGE_DAYS_COUNT);
   }, [days, isMediumScreen, isSmallerScreen]);
+
+  if (!isHydrated) return null;
 
   return (
     <div

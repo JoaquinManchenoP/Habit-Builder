@@ -131,8 +131,12 @@ export default function Navbar() {
           href="/home"
           className="flex items-center gap-3 text-xl font-semibold tracking-tight text-slate-800"
         >
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
-            <span className="text-base font-bold text-slate-800">HB</span>
+          <span className="grid h-16 w-16 place-items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+            <img
+              src="/app-logo.png"
+              alt="Habitoo"
+              className="h-13 w-13 object-contain"
+            />
           </span>
           <span className="leading-tight">Habit Builder</span>
         </Link>
