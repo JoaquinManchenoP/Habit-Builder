@@ -20,7 +20,11 @@ import {
   removeTodayCheckIn,
   updateHabitDetails,
 } from "../lib/habits";
-import { isHabitActiveToday } from "../lib/habitScheduleUtils";
+import {
+  countCheckInsOnLocalDate,
+  countCheckInsThisWeek,
+  isHabitActiveToday,
+} from "../lib/habitScheduleUtils";
 import WeekleyHabitsSection from "./components/weekleyhabits section/WeekleyHabitsSection";
 import DailyHabitsSection from "./components/dailyHabitsSection/DailyHabitSection";
 import MainCircularProgress from "./components/MainCircularProgress";
@@ -195,8 +199,27 @@ export default function HomePage() {
     }, MODAL_DURATION);
   };
 
-  const todayList = useMemo(() => todayHabits, [todayHabits]);
-  const weeklyList = useMemo(() => weeklyHabits, [weeklyHabits]);
+  const todayList = useMemo(() => {
+    const today = new Date();
+    const isCompleted = (habit) => {
+      const target = Math.max(1, habit.timesPerDay || 1);
+      const count = countCheckInsOnLocalDate(habit.checkIns || [], today);
+      return count >= target;
+    };
+    const incomplete = todayHabits.filter((habit) => !isCompleted(habit));
+    const completed = todayHabits.filter((habit) => isCompleted(habit));
+    return [...incomplete, ...completed];
+  }, [todayHabits]);
+  const weeklyList = useMemo(() => {
+    const isCompleted = (habit) => {
+      const target = Math.max(1, habit.timesPerWeek || 1);
+      const count = countCheckInsThisWeek(habit.checkIns || []);
+      return count >= target;
+    };
+    const incomplete = weeklyHabits.filter((habit) => !isCompleted(habit));
+    const completed = weeklyHabits.filter((habit) => isCompleted(habit));
+    return [...incomplete, ...completed];
+  }, [weeklyHabits]);
 
   return (
     <div className="-mx-4 -mt-6 min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:-mx-6 sm:px-6">

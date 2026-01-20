@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function MobileTopNav({ items }) {
   const pathname = usePathname();
+  const [optimisticPath, setOptimisticPath] = useState(null);
   const navRef = useRef(null);
 
   useEffect(() => {
@@ -33,6 +34,12 @@ export default function MobileTopNav({ items }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (optimisticPath && pathname === optimisticPath) {
+      setOptimisticPath(null);
+    }
+  }, [optimisticPath, pathname]);
+
   return (
     <nav
       ref={navRef}
@@ -40,13 +47,21 @@ export default function MobileTopNav({ items }) {
     >
       <div className="flex items-center justify-between gap-2 rounded-full bg-slate-900/95 px-3 py-2 shadow-xl ring-1 ring-slate-900/20">
         {items.map((item) => {
-          const isActive = pathname === item.href;
+          const currentPath = optimisticPath || pathname;
+          const isActive = currentPath === item.href;
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
               aria-current={isActive ? "page" : undefined}
+              onPointerDown={() => setOptimisticPath(item.href)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  setOptimisticPath(item.href);
+                }
+              }}
+              onClick={() => setOptimisticPath(item.href)}
               className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-full px-2 py-2 text-[11px] font-semibold leading-tight transition ${
                 isActive
                   ? "bg-slate-900 text-white"

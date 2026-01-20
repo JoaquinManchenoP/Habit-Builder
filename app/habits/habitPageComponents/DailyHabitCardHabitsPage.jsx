@@ -190,9 +190,9 @@ export default function DailyHabitCardHabitsPage({
               }
             }}
             onClick={handleCardToggle}
-            className={`group relative grid w-full min-w-0 rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition ${
-              isCollapsed
-                ? "h-[90px] grid-rows-[auto] items-center"
+            className={`group relative grid w-full min-w-0 rounded-xl border border-slate-200 bg-white p-5 pt-3 shadow-md transform origin-center transition-[height,transform] duration-500 ease-in-out ${
+            isCollapsed
+              ? "h-[90px] grid-rows-[auto] items-center"
                 : "h-[380px] grid-rows-[2fr_4fr_4fr] max-[360px]:h-auto max-[360px]:min-h-[320px] max-[360px]:w-full max-[360px]:p-4 max-[360px]:pt-1 max-[280px]:h-[370px] max-[280px]:min-h-0 max-[280px]:w-auto max-[280px]:p-5"
             } ${
               isFading
@@ -228,7 +228,7 @@ export default function DailyHabitCardHabitsPage({
                   }}
                 />
                 <div
-                  className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+                  className={`overflow-hidden transition-[max-height,opacity] duration-650 ease-in-out ${
                     isCollapsed
                       ? "max-h-0 opacity-0 pointer-events-none"
                       : "max-h-[1000px] opacity-100"

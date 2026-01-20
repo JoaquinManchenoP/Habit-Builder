@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import MobileTopNav from "./MobileTopNav";
 
 const NAV_ITEMS = [
@@ -122,6 +123,13 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [optimisticPath, setOptimisticPath] = useState(null);
+
+  useEffect(() => {
+    if (optimisticPath && pathname === optimisticPath) {
+      setOptimisticPath(null);
+    }
+  }, [optimisticPath, pathname]);
 
   return (
     <>
@@ -142,13 +150,21 @@ export default function Navbar() {
         </Link>
         <nav className="flex flex-col gap-4 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const currentPath = optimisticPath || pathname;
+            const isActive = currentPath === item.href;
             const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
+                onPointerDown={() => setOptimisticPath(item.href)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    setOptimisticPath(item.href);
+                  }
+                }}
+                onClick={() => setOptimisticPath(item.href)}
                 className={`flex items-center gap-4 rounded-xl px-5 py-3.5 text-sm font-semibold transition ${
                   isActive
                     ? "bg-amber-100 text-slate-900 shadow-lg"
