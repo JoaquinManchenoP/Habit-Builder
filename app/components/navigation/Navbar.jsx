@@ -146,7 +146,7 @@ export default function Navbar() {
               className="h-13 w-13 object-contain"
             />
           </span>
-          <span className="leading-tight">Habit Builder</span>
+          <span className="leading-tight">Habitoo</span>
         </Link>
         <nav className="flex flex-col gap-4 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
           {NAV_ITEMS.map((item) => {
