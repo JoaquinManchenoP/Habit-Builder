@@ -1,5 +1,15 @@
 import { redirect } from "next/navigation";
+import { createClient } from "./lib/supabase/server";
 
-export default function Home() {
-  redirect("/home");
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.user) {
+    redirect("/home");
+  }
+
+  redirect("/login");
 }

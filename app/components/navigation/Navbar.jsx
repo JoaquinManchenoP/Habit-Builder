@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import MobileTopNav from "./MobileTopNav";
+import { createClient } from "../../lib/supabase/client";
 
 const NAV_ITEMS = [
   {
@@ -123,7 +124,11 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [optimisticPath, setOptimisticPath] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
     if (optimisticPath && pathname === optimisticPath) {
@@ -131,9 +136,46 @@ export default function Navbar() {
     }
   }, [optimisticPath, pathname]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const loadUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (mounted) {
+        setUserEmail(user?.email || "");
+      }
+    };
+
+    loadUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email || "");
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const userInitials = useMemo(() => {
+    if (!userEmail) return "U";
+    const [name] = userEmail.split("@");
+    return name.slice(0, 2).toUpperCase();
+  }, [userEmail]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  };
+
   return (
     <>
-      <MobileTopNav items={NAV_ITEMS} />
+      <MobileTopNav items={NAV_ITEMS} onSignOut={handleSignOut} />
       <aside className="hidden w-60 shrink-0 flex-col gap-8 lg:flex">
         <Link
           href="/home"
@@ -185,6 +227,63 @@ export default function Navbar() {
             );
           })}
         </nav>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
+          >
+            <span className="flex items-center gap-3">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-slate-900 text-xs font-semibold text-white">
+                {userInitials}
+              </span>
+              <span className="flex flex-col">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Account
+                </span>
+                <span className="text-sm font-semibold text-slate-800">
+                  {userEmail || "Signed in"}
+                </span>
+              </span>
+            </span>
+            <svg
+              className="h-4 w-4 text-slate-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          {menuOpen ? (
+            <div className="absolute right-0 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 text-sm text-slate-700 shadow-lg">
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <path d="M16 17l5-5-5-5" />
+                  <path d="M21 12H9" />
+                </svg>
+                Sign out
+              </button>
+            </div>
+          ) : null}
+        </div>
       </aside>
     </>
   );
