@@ -128,6 +128,7 @@ export default function Navbar() {
   const [optimisticPath, setOptimisticPath] = useState(null);
   const [userEmail, setUserEmail] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -143,9 +144,10 @@ export default function Navbar() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (mounted) {
-        setUserEmail(user?.email || "");
-      }
+    if (mounted) {
+      setUserEmail(user?.email || "");
+      setIsAuthReady(true);
+    }
     };
 
     loadUser();
@@ -154,6 +156,7 @@ export default function Navbar() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserEmail(session?.user?.email || "");
+      setIsAuthReady(true);
     });
 
     return () => {
@@ -172,6 +175,10 @@ export default function Navbar() {
     await supabase.auth.signOut();
     router.replace("/login");
   };
+
+  if (!isAuthReady || !userEmail) {
+    return null;
+  }
 
   return (
     <>
