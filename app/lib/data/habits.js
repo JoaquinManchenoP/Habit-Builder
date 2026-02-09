@@ -1,5 +1,5 @@
-import { DEFAULT_ACTIVE_DAYS } from "./habitSchedule";
-import { createClient } from "./supabase/client";
+import { DEFAULT_ACTIVE_DAYS } from "../habitSchedule";
+import { createClient } from "../supabase/client";
 
 const toLocalISODate = (date) => {
   const year = date.getFullYear();

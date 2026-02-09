@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../../components/Button";
-import { createHabit } from "../../lib/habits";
+import { createHabit } from "../../lib/data";
 import {
   DEFAULT_ACTIVE_DAYS,
   WEEKDAY_LABELS,

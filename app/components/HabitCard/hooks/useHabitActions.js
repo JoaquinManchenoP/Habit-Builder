@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { updateHabitDetails } from "../../../lib/habits";
+import { updateHabitDetails } from "../../../lib/data";
 
 export const useHabitActions = ({
   habit,
