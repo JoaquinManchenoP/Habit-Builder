@@ -144,15 +144,17 @@ export default function HabitCard({
                 : "opacity-100 transform hover:scale-[1.01] active:scale-[0.99]"
             }`}
         >
-          <div className="h-full w-full" style={scaleStyle}>
-            <div
-              className={` pt-0 relative flex h-full w-full flex-col origin-center transition-transform ${
-                isCompletedNow
-                  ? "scale-[0.97] group-hover:scale-100"
-                  : "scale-100"
-              }`}
-              ref={contentRef}
-            >
+            <div className="h-full w-full" style={scaleStyle}>
+              <div
+                className={`pt-0 relative flex h-full w-full flex-col origin-center transition-[transform,opacity] duration-200 ${
+                  isFading ? "opacity-0" : "opacity-100 delay-500"
+                } ${
+                  isCompletedNow
+                    ? "scale-[0.97] group-hover:scale-100"
+                    : "scale-100"
+                }`}
+                ref={contentRef}
+              >
               <CardHeader
                 name={habit.name}
                 isCompletedToday={isCompletedNow}

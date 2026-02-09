@@ -176,7 +176,15 @@ export default function Navbar() {
     router.replace("/login");
   };
 
-  if (!isAuthReady || !userEmail) {
+  if (!isAuthReady) {
+    return (
+      <>
+        <div className="hidden w-60 shrink-0 lg:block" aria-hidden="true" />
+      </>
+    );
+  }
+
+  if (!userEmail) {
     return null;
   }
 

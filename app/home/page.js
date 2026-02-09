@@ -6,16 +6,9 @@ import DeleteConfirmationModal from "../components/HabitCard/components/DeleteCo
 import EditTargetHabitModal from "../components/HabitCard/components/EditTargetHabitModal";
 import { useHabitMenu } from "../components/HabitCard/hooks/useHabitMenu";
 import {
-  addMockWeeklyHabitCheckIn,
-  deleteMockHabit,
-  loadHabitsWithMock,
-  markMockHabitCompleted,
-  removeMockHabitTodayCheckIn,
-  updateMockHabitDetails,
-} from "../lib/habitData";
-import {
   addWeeklyHabitCheckIn,
   deleteHabit,
+  getHabits,
   markHabitCompleted,
   removeTodayCheckIn,
   updateHabitDetails,
@@ -35,6 +28,7 @@ const WEEK_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 export default function HomePage() {
   const [todayHabits, setTodayHabits] = useState([]);
   const [weeklyHabits, setWeeklyHabits] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeMenuHabit, setActiveMenuHabit] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isEditVisible, setIsEditVisible] = useState(false);
@@ -50,8 +44,9 @@ export default function HomePage() {
   const MAX_TARGET = 20;
 
   useEffect(() => {
-    const hydrate = () => {
-      const { habits } = loadHabitsWithMock();
+    const hydrate = async () => {
+      setIsLoading(true);
+      const habits = await getHabits();
       const today = new Date();
       setTodayHabits(
         habits.filter(
@@ -60,15 +55,20 @@ export default function HomePage() {
         )
       );
       setWeeklyHabits(habits.filter((habit) => habit.goalType === "weekly"));
+      setIsLoading(false);
     };
 
     hydrate();
-    window.addEventListener("storage", hydrate);
-    return () => window.removeEventListener("storage", hydrate);
+    const handleRefresh = () => {
+      hydrate();
+    };
+    window.addEventListener("habits:refresh", handleRefresh);
+    return () => window.removeEventListener("habits:refresh", handleRefresh);
   }, []);
 
-  const refreshHabits = () => {
-    const { habits } = loadHabitsWithMock();
+  const refreshHabits = async () => {
+    setIsLoading(true);
+    const habits = await getHabits();
     const today = new Date();
     setTodayHabits(
       habits.filter(
@@ -77,42 +77,27 @@ export default function HomePage() {
       )
     );
     setWeeklyHabits(habits.filter((habit) => habit.goalType === "weekly"));
+    setIsLoading(false);
   };
 
-  const handleWeeklyIncrement = (habit) => {
-    if (habit.isMock) {
-      addMockWeeklyHabitCheckIn(habit.id);
-    } else {
-      addWeeklyHabitCheckIn(habit.id);
-    }
-    refreshHabits();
+  const handleWeeklyIncrement = async (habit) => {
+    await addWeeklyHabitCheckIn(habit.id);
+    await refreshHabits();
   };
 
-  const handleDailyIncrement = (habit) => {
-    if (habit.isMock) {
-      markMockHabitCompleted(habit.id);
-    } else {
-      markHabitCompleted(habit.id);
-    }
-    refreshHabits();
+  const handleDailyIncrement = async (habit) => {
+    await markHabitCompleted(habit.id);
+    await refreshHabits();
   };
 
-  const handleWeeklyDecrement = (habit) => {
-    if (habit.isMock) {
-      removeMockHabitTodayCheckIn(habit.id);
-    } else {
-      removeTodayCheckIn(habit.id);
-    }
-    refreshHabits();
+  const handleWeeklyDecrement = async (habit) => {
+    await removeTodayCheckIn(habit.id);
+    await refreshHabits();
   };
 
-  const handleDailyDecrement = (habit) => {
-    if (habit.isMock) {
-      removeMockHabitTodayCheckIn(habit.id);
-    } else {
-      removeTodayCheckIn(habit.id);
-    }
-    refreshHabits();
+  const handleDailyDecrement = async (habit) => {
+    await removeTodayCheckIn(habit.id);
+    await refreshHabits();
   };
 
   const handleMenuOpen = (habit, event) => {
@@ -148,7 +133,7 @@ export default function HomePage() {
     setEditTarget(clampTarget(parsed));
   };
 
-  const handleSaveEdit = (nextName, nextTarget) => {
+  const handleSaveEdit = async (nextName, nextTarget) => {
     if (!activeMenuHabit) return;
     const trimmedName = nextName?.trim();
     if (!trimmedName) return;
@@ -158,15 +143,8 @@ export default function HomePage() {
         ? { name: trimmedName, timesPerWeek: resolvedTarget }
         : { name: trimmedName, timesPerDay: resolvedTarget };
 
-    if (activeMenuHabit.isMock) {
-      updateMockHabitDetails(activeMenuHabit.id, updates);
-    } else {
-      updateHabitDetails(activeMenuHabit.id, updates);
-    }
-
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("storage"));
-    }
+    await updateHabitDetails(activeMenuHabit.id, updates);
+    await refreshHabits();
     closeEditModal();
   };
 
@@ -187,14 +165,7 @@ export default function HomePage() {
     if (!activeMenuHabit) return;
     setIsDeleteVisible(false);
     setTimeout(() => {
-      if (activeMenuHabit.isMock) {
-        deleteMockHabit(activeMenuHabit.id);
-      } else {
-        deleteHabit(activeMenuHabit.id);
-      }
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("storage"));
-      }
+      deleteHabit(activeMenuHabit.id).then(refreshHabits);
       setIsDeleteActive(false);
     }, MODAL_DURATION);
   };
@@ -220,6 +191,32 @@ export default function HomePage() {
     const completed = weeklyHabits.filter((habit) => isCompleted(habit));
     return [...incomplete, ...completed];
   }, [weeklyHabits]);
+
+  if (isLoading) {
+    return (
+      <div className="-mx-4 -mt-6 min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:-mx-6 sm:px-6">
+        <div className="mx-auto flex min-h-[70vh] w-full max-w-xl flex-col items-center justify-center gap-5">
+          <div className="relative h-14 w-14">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-200 via-amber-300 to-orange-200 opacity-70 blur-md" />
+            <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-amber-200/70 bg-white shadow-sm">
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700" />
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
+              Loading
+            </p>
+            <p className="text-lg font-semibold text-slate-800">
+              Warming up your habits
+            </p>
+          </div>
+          <div className="h-1 w-32 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-slate-400/70" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="-mx-4 -mt-6 min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:-mx-6 sm:px-6">

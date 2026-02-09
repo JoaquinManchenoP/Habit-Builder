@@ -7,24 +7,18 @@ import PageHeader from "./habitPageComponents/page-header/PageHeader";
 import {
   deleteHabit,
   addWeeklyHabitCheckIn,
+  getHabits,
   markHabitCompleted,
   removeTodayCheckIn,
 } from "../lib/habits";
-import {
-  deleteMockHabit,
-  addMockWeeklyHabitCheckIn,
-  loadHabitsWithMock,
-  markMockHabitCompleted,
-  removeMockHabitTodayCheckIn,
-} from "../lib/habitData";
 
 export default function HabitsPage() {
   const [habits, setHabits] = useState([]);
-  const [usingMockData, setUsingMockData] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [isModalActive, setIsModalActive] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [fadeTargetId, setFadeTargetId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const cardRefs = useRef({});
   const previousPositions = useRef({});
 
@@ -34,50 +28,40 @@ export default function HabitsPage() {
   const REPOSITION_DURATION = 450;
 
   useEffect(() => {
-    const hydrate = () => {
-      const { habits: loaded, usingMockData: usingMock } = loadHabitsWithMock();
+    const hydrate = async () => {
+      setIsLoading(true);
+      const loaded = await getHabits();
       setHabits(loaded);
-      setUsingMockData(usingMock);
+      setIsLoading(false);
     };
 
     hydrate();
-    window.addEventListener("storage", hydrate);
-    return () => window.removeEventListener("storage", hydrate);
+    const handleRefresh = () => {
+      hydrate();
+    };
+    window.addEventListener("habits:refresh", handleRefresh);
+    return () => window.removeEventListener("habits:refresh", handleRefresh);
   }, []);
 
-  const handleComplete = (id, isChecked, isoDateOverride = null) => {
+  const handleComplete = async (id, isChecked, isoDateOverride = null) => {
     const habit = habits.find((item) => item.id === id);
     if (!habit) return;
 
     if (isChecked) {
-      if (habit.isMock) {
-        markMockHabitCompleted(id, isoDateOverride);
-      } else {
-        markHabitCompleted(id, isoDateOverride);
-      }
+      await markHabitCompleted(id, isoDateOverride);
     } else {
-      if (habit.isMock) {
-        removeMockHabitTodayCheckIn(id);
-      } else {
-        removeTodayCheckIn(id);
-      }
+      await removeTodayCheckIn(id);
     }
 
-    const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
+    const hydrated = await getHabits();
     setHabits(hydrated);
-    setUsingMockData(usingMock);
   };
 
-  const handleWeeklyCheckIn = (habit) => {
+  const handleWeeklyCheckIn = async (habit) => {
     if (!habit) return;
-    if (habit.isMock) {
-      addMockWeeklyHabitCheckIn(habit.id);
-    } else {
-      addWeeklyHabitCheckIn(habit.id);
-    }
-    const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
+    await addWeeklyHabitCheckIn(habit.id);
+    const hydrated = await getHabits();
     setHabits(hydrated);
-    setUsingMockData(usingMock);
   };
 
   const capturePositions = () => {
@@ -118,19 +102,13 @@ export default function HabitsPage() {
     });
   }, [habits, REPOSITION_DURATION]);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const habit = habits.find((item) => item.id === id);
     if (!habit) return;
 
-    if (habit.isMock) {
-      deleteMockHabit(id);
-    } else {
-      deleteHabit(id);
-    }
-
-    const { habits: hydrated, usingMockData: usingMock } = loadHabitsWithMock();
+    await deleteHabit(id);
+    const hydrated = await getHabits();
     setHabits(hydrated);
-    setUsingMockData(usingMock);
   };
 
   const handleDeleteRequest = (id) => {
@@ -168,10 +146,34 @@ export default function HabitsPage() {
 
   const pendingHabit = habits.find((habit) => habit.id === pendingDeleteId);
 
+  if (isLoading) {
+    return (
+      <div className="mx-auto flex min-h-[70vh] w-full max-w-xl flex-col items-center justify-center gap-5">
+        <div className="relative h-14 w-14">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-200 via-amber-300 to-orange-200 opacity-70 blur-md" />
+          <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-amber-200/70 bg-white shadow-sm">
+            <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700" />
+          </div>
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
+            Loading
+          </p>
+          <p className="text-lg font-semibold text-slate-800">
+            Fetching your habits
+          </p>
+        </div>
+        <div className="h-1 w-32 overflow-hidden rounded-full bg-slate-200">
+          <div className="h-full w-1/2 animate-pulse rounded-full bg-slate-400/70" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <section className="space-y-4">
-        <PageHeader habitsCount={habits.length} usingMockData={usingMockData} />
+        <PageHeader habitsCount={habits.length} usingMockData={false} />
         <HabitsList
           habits={habits}
           onComplete={handleComplete}
