@@ -10,7 +10,7 @@ import {
   getHabits,
   markHabitCompleted,
   removeTodayCheckIn,
-} from "../lib/habits";
+} from "../lib/data";
 
 export default function HabitsPage() {
   const [habits, setHabits] = useState([]);

@@ -12,7 +12,7 @@ import {
   markHabitCompleted,
   removeTodayCheckIn,
   updateHabitDetails,
-} from "../lib/habits";
+} from "../lib/data";
 import {
   countCheckInsOnLocalDate,
   countCheckInsThisWeek,
