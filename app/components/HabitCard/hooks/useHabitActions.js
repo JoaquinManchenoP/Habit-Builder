@@ -1,6 +1,5 @@
 import { useRouter } from "next/navigation";
 import { updateHabitDetails } from "../../../lib/habits";
-import { updateMockHabitDetails } from "../../../lib/habitData";
 
 export const useHabitActions = ({
   habit,
@@ -43,7 +42,7 @@ export const useHabitActions = ({
     openBackfillModal();
   };
 
-  const handleSaveEdit = (nextName, nextActiveDays, nextTarget) => {
+  const handleSaveEdit = async (nextName, nextActiveDays, nextTarget) => {
     if (!nextName) {
       closeEditModal?.();
       return;
@@ -62,14 +61,9 @@ export const useHabitActions = ({
       habit.goalType === "weekly"
         ? { name: nextName, activeDays: resolvedActiveDays, timesPerWeek: parsedTarget }
         : { name: nextName, activeDays: resolvedActiveDays, timesPerDay: parsedTarget };
-    if (habit.isMock) {
-      updateMockHabitDetails(habit.id, updates);
-    } else {
-      updateHabitDetails(habit.id, updates);
-    }
-    // Notify listeners (Habits page) to rehydrate
+    await updateHabitDetails(habit.id, updates);
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("habits:refresh"));
     }
     onEditNameChange?.(nextName);
     onEditActiveDaysChange?.(resolvedActiveDays);

@@ -31,7 +31,7 @@ export default function NewHabitForm() {
     ? `Habit name must be ${MAX_NAME_LENGTH} characters or less.`
     : "";
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!goalType) {
       setStatusMessage("Please choose a goal type.");
@@ -65,7 +65,7 @@ export default function NewHabitForm() {
       return;
     }
 
-    createHabit(
+    await createHabit(
       trimmedName,
       goalType === "daily" ? activeDays : undefined,
       goalType,
