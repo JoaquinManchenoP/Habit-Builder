@@ -2,16 +2,16 @@ import { DEFAULT_ACTIVE_DAYS, isActiveDay, normalizeActiveDays } from "./habitSc
 import { getThemeColorForGoalType } from "./habitTheme";
 
 const COLORS = [
-  "#ffe08a",
-  "#ffd86a",
-  "#ffcd1f",
-  "#f3c01b",
-  "#e8b317",
-  "#dca513",
-  "#d09810",
-  "#c48b0c",
-  "#b87d09",
-  "#ac7006",
+  "#ffe2b8",
+  "#ffd19a",
+  "#ffb347",
+  "#ffa53c",
+  "#ff972f",
+  "#ff8923",
+  "#f97c1a",
+  "#eb6f12",
+  "#dd620a",
+  "#cf5504",
 ];
 
 const toISODate = (date) => {

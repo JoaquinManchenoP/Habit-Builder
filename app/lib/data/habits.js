@@ -1,20 +1,6 @@
 import { DEFAULT_ACTIVE_DAYS } from "../habitSchedule";
 import { createClient } from "../supabase/client";
-
-const toLocalISODate = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
-const toLocalDateFromISO = (isoDate) => {
-  if (!isoDate) return null;
-  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return null;
-  const [, year, month, day] = match;
-  return new Date(Number(year), Number(month) - 1, Number(day), 12);
-};
+import { parseLocalISODate, toLocalISODate } from "../dateUtils";
 
 const getUserId = async (supabase) => {
   const {
@@ -141,7 +127,7 @@ export async function markHabitCompleted(id, isoDateOverride = null) {
   const userId = await getUserId(supabase);
   if (!userId) return false;
   const targetDate =
-    (isoDateOverride && toLocalDateFromISO(isoDateOverride)) || new Date();
+    (isoDateOverride && parseLocalISODate(isoDateOverride)) || new Date();
   const localDate = toLocalISODate(targetDate);
   const checkedAt = targetDate.toISOString();
 

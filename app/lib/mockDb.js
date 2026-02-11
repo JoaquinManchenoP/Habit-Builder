@@ -1,6 +1,7 @@
 import { DEFAULT_ACTIVE_DAYS, normalizeActiveDays } from "./habitSchedule";
 import { buildMockHabits } from "./analytics";
 import { getThemeColorForGoalType } from "./habitTheme";
+import { parseLocalISODate, toLocalISODate } from "./dateUtils";
 
 const STORAGE_KEY = "habits";
 const DEFAULT_USER_ID = "local-user";
@@ -53,21 +54,6 @@ const normalizeHabit = (habit) => {
     timesPerWeek: goalType === "weekly" ? timesPerWeek : habit.timesPerWeek,
     activeDays: normalizeActiveDays(habit.activeDays),
   };
-};
-
-const toLocalISODate = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
-const toLocalDateFromISO = (isoDate) => {
-  if (!isoDate) return null;
-  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return null;
-  const [_, year, month, day] = match;
-  return new Date(Number(year), Number(month) - 1, Number(day), 12);
 };
 
 const getCompletionKeyForCheckIn = (goalType, isoTimestamp) => {
@@ -215,7 +201,7 @@ export const deleteHabit = (habitId) => {
 export const addCheckIn = (habitId, isoDateOverride = null) => {
   const habits = readUserHabits();
   const targetDate =
-    (isoDateOverride && toLocalDateFromISO(isoDateOverride)) || new Date();
+    (isoDateOverride && parseLocalISODate(isoDateOverride)) || new Date();
   const isoDate = toLocalISODate(targetDate);
   const isoTimestamp = targetDate.toISOString();
   const updated = habits.map((habit) => {
@@ -431,7 +417,7 @@ export const deleteMockHabit = (habitId) =>
 
 export const addMockCheckIn = (habitId, isoDateOverride = null) => {
   const targetDate =
-    (isoDateOverride && toLocalDateFromISO(isoDateOverride)) || new Date();
+    (isoDateOverride && parseLocalISODate(isoDateOverride)) || new Date();
   const isoDate = toLocalISODate(targetDate);
   const isoTimestamp = targetDate.toISOString();
   return setSessionMockHabits(

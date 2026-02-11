@@ -1,23 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import CardMenu from "../components/HabitCard/components/CardMenu";
 import DeleteConfirmationModal from "../components/HabitCard/components/DeleteConfirmationModal";
 import EditTargetHabitModal from "../components/HabitCard/components/EditTargetHabitModal";
 import { useHabitMenu } from "../components/HabitCard/hooks/useHabitMenu";
 import {
-  addWeeklyHabitCheckIn,
-  deleteHabit,
-  getHabits,
-  markHabitCompleted,
-  removeTodayCheckIn,
-  updateHabitDetails,
-} from "../lib/data";
-import {
   countCheckInsOnLocalDate,
   countCheckInsThisWeek,
-  isHabitActiveToday,
 } from "../lib/habitScheduleUtils";
+import { useHabits } from "../lib/hooks/useHabits";
+import {
+  HABIT_TARGET_MAX,
+  HABIT_TARGET_MIN,
+  MODAL_DURATION_MS,
+} from "../lib/habitConstants";
 import WeekleyHabitsSection from "./components/weekleyhabits section/WeekleyHabitsSection";
 import DailyHabitsSection from "./components/dailyHabitsSection/DailyHabitSection";
 import MainCircularProgress from "./components/MainCircularProgress";
@@ -26,79 +23,29 @@ import HomeCalendar from "./components/HomeCalendar";
 const WEEK_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 
 export default function HomePage() {
-  const [todayHabits, setTodayHabits] = useState([]);
-  const [weeklyHabits, setWeeklyHabits] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { todayHabits, weeklyHabits, isLoading, markCompleted, removeToday, addWeeklyCheckIn, deleteById, updateById } =
+    useHabits();
   const [activeMenuHabit, setActiveMenuHabit] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isEditVisible, setIsEditVisible] = useState(false);
   const [editName, setEditName] = useState("");
-  const [editTarget, setEditTarget] = useState(1);
+  const [editTarget, setEditTarget] = useState(HABIT_TARGET_MIN);
   const [isDeleteActive, setIsDeleteActive] = useState(false);
   const [isDeleteVisible, setIsDeleteVisible] = useState(false);
   const menuAnchorRef = useRef(null);
   const { menu, openMenu, closeMenu } = useHabitMenu(menuAnchorRef);
 
-  const MODAL_DURATION = 300;
-  const MIN_TARGET = 1;
-  const MAX_TARGET = 20;
-
-  useEffect(() => {
-    const hydrate = async () => {
-      setIsLoading(true);
-      const habits = await getHabits();
-      const today = new Date();
-      setTodayHabits(
-        habits.filter(
-          (habit) =>
-            habit.goalType === "daily" && isHabitActiveToday(habit, today)
-        )
-      );
-      setWeeklyHabits(habits.filter((habit) => habit.goalType === "weekly"));
-      setIsLoading(false);
-    };
-
-    hydrate();
-    const handleRefresh = () => {
-      hydrate();
-    };
-    window.addEventListener("habits:refresh", handleRefresh);
-    return () => window.removeEventListener("habits:refresh", handleRefresh);
-  }, []);
-
-  const refreshHabits = async () => {
-    setIsLoading(true);
-    const habits = await getHabits();
-    const today = new Date();
-    setTodayHabits(
-      habits.filter(
-        (habit) =>
-          habit.goalType === "daily" && isHabitActiveToday(habit, today)
-      )
-    );
-    setWeeklyHabits(habits.filter((habit) => habit.goalType === "weekly"));
-    setIsLoading(false);
-  };
-
   const handleWeeklyIncrement = async (habit) => {
-    await addWeeklyHabitCheckIn(habit.id);
-    await refreshHabits();
+    await addWeeklyCheckIn(habit.id);
   };
 
   const handleDailyIncrement = async (habit) => {
-    await markHabitCompleted(habit.id);
-    await refreshHabits();
+    await markCompleted(habit.id);
   };
 
-  const handleWeeklyDecrement = async (habit) => {
-    await removeTodayCheckIn(habit.id);
-    await refreshHabits();
-  };
+  const handleWeeklyDecrement = async (habit) => removeToday(habit.id);
 
-  const handleDailyDecrement = async (habit) => {
-    await removeTodayCheckIn(habit.id);
-    await refreshHabits();
-  };
+  const handleDailyDecrement = async (habit) => removeToday(habit.id);
 
   const handleMenuOpen = (habit, event) => {
     setActiveMenuHabit(habit);
@@ -121,11 +68,11 @@ export default function HomePage() {
 
   const closeEditModal = () => {
     setIsEditVisible(false);
-    setTimeout(() => setIsEditOpen(false), MODAL_DURATION);
+    setTimeout(() => setIsEditOpen(false), MODAL_DURATION_MS);
   };
 
   const clampTarget = (value) =>
-    Math.max(MIN_TARGET, Math.min(MAX_TARGET, value));
+    Math.max(HABIT_TARGET_MIN, Math.min(HABIT_TARGET_MAX, value));
 
   const handleTargetChange = (value) => {
     const parsed = Number.parseInt(value, 10);
@@ -143,8 +90,7 @@ export default function HomePage() {
         ? { name: trimmedName, timesPerWeek: resolvedTarget }
         : { name: trimmedName, timesPerDay: resolvedTarget };
 
-    await updateHabitDetails(activeMenuHabit.id, updates);
-    await refreshHabits();
+    await updateById(activeMenuHabit.id, updates);
     closeEditModal();
   };
 
@@ -158,16 +104,16 @@ export default function HomePage() {
 
   const handleCancelDelete = () => {
     setIsDeleteVisible(false);
-    setTimeout(() => setIsDeleteActive(false), MODAL_DURATION);
+    setTimeout(() => setIsDeleteActive(false), MODAL_DURATION_MS);
   };
 
   const handleConfirmDelete = () => {
     if (!activeMenuHabit) return;
     setIsDeleteVisible(false);
     setTimeout(() => {
-      deleteHabit(activeMenuHabit.id).then(refreshHabits);
+      deleteById(activeMenuHabit.id);
       setIsDeleteActive(false);
-    }, MODAL_DURATION);
+    }, MODAL_DURATION_MS);
   };
 
   const todayList = useMemo(() => {
@@ -197,8 +143,8 @@ export default function HomePage() {
       <div className="-mx-4 -mt-6 min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:-mx-6 sm:px-6">
         <div className="mx-auto flex min-h-[70vh] w-full max-w-xl flex-col items-center justify-center gap-5">
           <div className="relative h-14 w-14">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-200 via-amber-300 to-orange-200 opacity-70 blur-md" />
-            <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-amber-200/70 bg-white shadow-sm">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-200 via-orange-300 to-orange-400 opacity-70 blur-md" />
+            <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-orange-200/70 bg-white shadow-sm">
               <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700" />
             </div>
           </div>
@@ -258,8 +204,8 @@ export default function HomePage() {
             ? "Times per week"
             : "Times per day"
         }
-        minTarget={MIN_TARGET}
-        maxTarget={MAX_TARGET}
+        minTarget={HABIT_TARGET_MIN}
+        maxTarget={HABIT_TARGET_MAX}
         onChangeName={setEditName}
         onChangeTarget={handleTargetChange}
         onIncrementTarget={() =>

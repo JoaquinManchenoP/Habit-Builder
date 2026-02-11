@@ -61,7 +61,7 @@ export default function EditHabitModal({
               />
             </label>
             {targetError ? (
-              <p className="text-xs font-medium text-amber-600">
+              <p className="text-xs font-medium text-orange-600">
                 {targetError}
               </p>
             ) : null}

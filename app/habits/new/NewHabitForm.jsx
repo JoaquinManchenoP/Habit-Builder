@@ -9,10 +9,11 @@ import {
   WEEKDAY_LABELS,
   WEEKDAY_ORDER,
 } from "../../lib/habitSchedule";
+import { HABIT_TARGET_MAX } from "../../lib/habitConstants";
 
 export default function NewHabitForm() {
   const [name, setName] = useState("");
-  const [goalType, setGoalType] = useState("");
+  const [goalType, setGoalType] = useState("daily");
   const [activeDays, setActiveDays] = useState({ ...DEFAULT_ACTIVE_DAYS });
   const [timesPerDay, setTimesPerDay] = useState("1");
   const [timesPerWeek, setTimesPerWeek] = useState("1");
@@ -53,14 +54,13 @@ export default function NewHabitForm() {
 
     const rawTarget = goalType === "daily" ? timesPerDay : timesPerWeek;
     const targetCount = parseInt(rawTarget, 10);
-    const maxTarget = 20;
     if (!Number.isInteger(targetCount) || targetCount < 1) {
       setStatusMessage("Please provide a valid target count.");
       setStatusTone("warning");
       return;
     }
-    if (targetCount > maxTarget) {
-      setStatusMessage(`Target count cannot exceed ${maxTarget}.`);
+    if (targetCount > HABIT_TARGET_MAX) {
+      setStatusMessage(`Target count cannot exceed ${HABIT_TARGET_MAX}.`);
       setStatusTone("warning");
       return;
     }
@@ -115,7 +115,7 @@ export default function NewHabitForm() {
           <input
             type="number"
             min={1}
-            max={20}
+            max={HABIT_TARGET_MAX}
             step={1}
             value={timesPerDay}
             onChange={(event) => setTimesPerDay(event.target.value)}
@@ -130,7 +130,7 @@ export default function NewHabitForm() {
           <input
             type="number"
             min={1}
-            max={20}
+            max={HABIT_TARGET_MAX}
             step={1}
             value={timesPerWeek}
             onChange={(event) => setTimesPerWeek(event.target.value)}
@@ -150,7 +150,7 @@ export default function NewHabitForm() {
           placeholder="e.g. Morning run"
         />
         {inlineWarningMessage ? (
-          <span className="text-xs font-medium text-amber-600">
+          <span className="text-xs font-medium text-orange-600">
             {inlineWarningMessage}
           </span>
         ) : null}
@@ -189,7 +189,7 @@ export default function NewHabitForm() {
           <p
             className={`text-sm ${
               statusTone === "warning"
-                ? "text-amber-700"
+                ? "text-orange-700"
                 : statusTone === "success"
                 ? "text-emerald-700"
                 : "text-slate-600"

@@ -4,21 +4,7 @@ import {
   getStartOfWeekLocal,
 } from "../../../lib/habitScheduleUtils";
 import { isActiveDay, normalizeActiveDays } from "../../../lib/habitSchedule";
-
-const toLocalISODate = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
-const toLocalDateFromISO = (iso) => {
-  if (!iso) return null;
-  const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return null;
-  const [_, year, month, day] = match;
-  return new Date(Number(year), Number(month) - 1, Number(day));
-};
+import { parseLocalISODate, toLocalISODate } from "../../../lib/dateUtils";
 
 const isActiveDayLocal = (date, activeDays) => {
   const key = getLocalDayKey(date);
@@ -107,7 +93,7 @@ export const calculateAvailableConsistency = (habit) => {
     today.getDate()
   );
   const createdAtDate =
-    toLocalDateFromISO(habit.createdAt) || normalizedToday;
+    parseLocalISODate(habit.createdAt, 0) || normalizedToday;
   if (normalizedToday < createdAtDate) return 0;
   const normalizedActiveDays = normalizeActiveDays(habit.activeDays);
   const completionSet = new Set((habit.completions || []).map((iso) => iso));
@@ -173,7 +159,7 @@ export const calculateDailyCurrentStreak = (habit) => {
     today.getDate()
   );
   const createdAtDate =
-    toLocalDateFromISO(habit.createdAt) || normalizedToday;
+    parseLocalISODate(habit.createdAt, 0) || normalizedToday;
   if (normalizedToday < createdAtDate) return 0;
   const normalizedActiveDays = normalizeActiveDays(habit.activeDays);
   const completionSet = new Set((habit.completions || []).map((iso) => iso));

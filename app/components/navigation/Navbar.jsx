@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import MobileTopNav from "./MobileTopNav";
 import { createClient } from "../../lib/supabase/client";
 
@@ -48,56 +48,56 @@ const NAV_ITEMS = [
       );
     },
   },
-  {
-    label: "My Stats",
-    href: "/my-stats",
-    icon: function StatsIcon({ className }) {
-      return (
-        <svg
-          className={className}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M4 19h16" />
-          <path d="M7 19v-6" />
-          <path d="M12 19v-9" />
-          <path d="M17 19v-4" />
-          <path d="M17.5 6v2.2M16.4 7.1h2.2" />
-        </svg>
-      );
-    },
-  },
-  {
-    label: "Leaderboard",
-    href: "/leaderboard",
-    icon: function LeaderboardIcon({ className }) {
-      return (
-        <svg
-          className={className}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M7 4h10v3a5 5 0 0 1-10 0V4z" />
-          <path d="M7 4H5a2 2 0 0 0 2 2" />
-          <path d="M17 4h2a2 2 0 0 1-2 2" />
-          <path d="M12 14v4" />
-          <path d="M9 18h6" />
-          <path d="M7 20h10" />
-          <path d="M12 2.5l.7 1.4 1.6.2-1.2 1.1.3 1.6-1.4-.8-1.4.8.3-1.6-1.2-1.1 1.6-.2z" />
-          <circle cx="6.5" cy="6.5" r="0.9" />
-          <circle cx="17.5" cy="6.5" r="0.9" />
-        </svg>
-      );
-    },
-  },
+  // {
+  //   label: "My Stats",
+  //   href: "/my-stats",
+  //   icon: function StatsIcon({ className }) {
+  //     return (
+  //       <svg
+  //         className={className}
+  //         viewBox="0 0 24 24"
+  //         fill="none"
+  //         stroke="currentColor"
+  //         strokeWidth="1.8"
+  //         strokeLinecap="round"
+  //         strokeLinejoin="round"
+  //       >
+  //         <path d="M4 19h16" />
+  //         <path d="M7 19v-6" />
+  //         <path d="M12 19v-9" />
+  //         <path d="M17 19v-4" />
+  //         <path d="M17.5 6v2.2M16.4 7.1h2.2" />
+  //       </svg>
+  //     );
+  //   },
+  // },
+  // {
+  //   label: "Leaderboard",
+  //   href: "/leaderboard",
+  //   icon: function LeaderboardIcon({ className }) {
+  //     return (
+  //       <svg
+  //         className={className}
+  //         viewBox="0 0 24 24"
+  //         fill="none"
+  //         stroke="currentColor"
+  //         strokeWidth="1.8"
+  //         strokeLinecap="round"
+  //         strokeLinejoin="round"
+  //       >
+  //         <path d="M7 4h10v3a5 5 0 0 1-10 0V4z" />
+  //         <path d="M7 4H5a2 2 0 0 0 2 2" />
+  //         <path d="M17 4h2a2 2 0 0 1-2 2" />
+  //         <path d="M12 14v4" />
+  //         <path d="M9 18h6" />
+  //         <path d="M7 20h10" />
+  //         <path d="M12 2.5l.7 1.4 1.6.2-1.2 1.1.3 1.6-1.4-.8-1.4.8.3-1.6-1.2-1.1 1.6-.2z" />
+  //         <circle cx="6.5" cy="6.5" r="0.9" />
+  //         <circle cx="17.5" cy="6.5" r="0.9" />
+  //       </svg>
+  //     );
+  //   },
+  // },
   {
     label: "New Habit",
     href: "/habits/new",
@@ -127,8 +127,10 @@ export default function Navbar() {
   const router = useRouter();
   const [optimisticPath, setOptimisticPath] = useState(null);
   const [userEmail, setUserEmail] = useState("");
+  const [emailFontSize, setEmailFontSize] = useState(14);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const userEmailRef = useRef(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -171,10 +173,43 @@ export default function Navbar() {
     return name.slice(0, 2).toUpperCase();
   }, [userEmail]);
 
+  const accountDisplayName = useMemo(() => {
+    if (!userEmail) return "Signed in";
+    const [name] = userEmail.split("@");
+    return name || "Signed in";
+  }, [userEmail]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.replace("/login");
   };
+
+  useEffect(() => {
+    const fitUserEmail = () => {
+      const node = userEmailRef.current;
+      if (!node) return;
+
+      const maxSize = 14;
+      const minSize = 8;
+      let nextSize = maxSize;
+
+      node.style.fontSize = `${nextSize}px`;
+
+      while (node.scrollWidth > node.clientWidth && nextSize > minSize) {
+        nextSize -= 0.5;
+        node.style.fontSize = `${nextSize}px`;
+      }
+
+      setEmailFontSize(nextSize);
+    };
+
+    fitUserEmail();
+    window.addEventListener("resize", fitUserEmail);
+
+    return () => {
+      window.removeEventListener("resize", fitUserEmail);
+    };
+  }, [userEmail]);
 
   if (!isAuthReady) {
     return (
@@ -224,7 +259,7 @@ export default function Navbar() {
                 onClick={() => setOptimisticPath(item.href)}
                 className={`flex items-center gap-4 rounded-xl px-5 py-3.5 text-sm font-semibold transition ${
                   isActive
-                    ? "bg-amber-100 text-slate-900 shadow-lg"
+                    ? "bg-orange-100 text-slate-900 shadow-lg"
                     : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
                 }`}
               >
@@ -248,16 +283,20 @@ export default function Navbar() {
             onClick={() => setMenuOpen((prev) => !prev)}
             className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
           >
-            <span className="flex items-center gap-3">
+            <span className="flex min-w-0 flex-1 items-center gap-3">
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-slate-900 text-xs font-semibold text-white">
                 {userInitials}
               </span>
-              <span className="flex flex-col">
+              <span className="flex min-w-0 flex-col">
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Account
                 </span>
-                <span className="text-sm font-semibold text-slate-800">
-                  {userEmail || "Signed in"}
+                <span
+                  ref={userEmailRef}
+                  className="whitespace-nowrap font-semibold leading-tight text-slate-800"
+                  style={{ fontSize: `${emailFontSize}px` }}
+                >
+                  {accountDisplayName}
                 </span>
               </span>
             </span>

@@ -4,64 +4,38 @@ import { useEffect, useRef, useState } from "react";
 import DeleteConfirmationModal from "../components/HabitCard/components/DeleteConfirmationModal";
 import HabitsList from "./habitPageComponents/HabitsList";
 import PageHeader from "./habitPageComponents/page-header/PageHeader";
+import { useHabits } from "../lib/hooks/useHabits";
 import {
-  deleteHabit,
-  addWeeklyHabitCheckIn,
-  getHabits,
-  markHabitCompleted,
-  removeTodayCheckIn,
-} from "../lib/data";
+  CARD_FADE_DELAY_MS,
+  CARD_FADE_DURATION_MS,
+  CARD_REPOSITION_DURATION_MS,
+  MODAL_DURATION_MS,
+} from "../lib/habitConstants";
 
 export default function HabitsPage() {
-  const [habits, setHabits] = useState([]);
+  const { habits, isLoading, markCompleted, removeToday, addWeeklyCheckIn, deleteById } =
+    useHabits();
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [isModalActive, setIsModalActive] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [fadeTargetId, setFadeTargetId] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const cardRefs = useRef({});
   const previousPositions = useRef({});
-
-  const MODAL_DURATION = 300;
-  const CARD_FADE_DELAY = 300;
-  const CARD_FADE_DURATION = 450;
-  const REPOSITION_DURATION = 450;
-
-  useEffect(() => {
-    const hydrate = async () => {
-      setIsLoading(true);
-      const loaded = await getHabits();
-      setHabits(loaded);
-      setIsLoading(false);
-    };
-
-    hydrate();
-    const handleRefresh = () => {
-      hydrate();
-    };
-    window.addEventListener("habits:refresh", handleRefresh);
-    return () => window.removeEventListener("habits:refresh", handleRefresh);
-  }, []);
 
   const handleComplete = async (id, isChecked, isoDateOverride = null) => {
     const habit = habits.find((item) => item.id === id);
     if (!habit) return;
 
     if (isChecked) {
-      await markHabitCompleted(id, isoDateOverride);
+      await markCompleted(id, isoDateOverride);
     } else {
-      await removeTodayCheckIn(id);
+      await removeToday(id);
     }
-
-    const hydrated = await getHabits();
-    setHabits(hydrated);
   };
 
   const handleWeeklyCheckIn = async (habit) => {
     if (!habit) return;
-    await addWeeklyHabitCheckIn(habit.id);
-    const hydrated = await getHabits();
-    setHabits(hydrated);
+    await addWeeklyCheckIn(habit.id);
   };
 
   const capturePositions = () => {
@@ -87,28 +61,26 @@ export default function HabitsPage() {
           node.style.transition = "none";
           node.style.transform = `translate(${dx}px, ${dy}px)`;
           requestAnimationFrame(() => {
-            node.style.transition = `transform ${REPOSITION_DURATION}ms ease-in-out`;
+            node.style.transition = `transform ${CARD_REPOSITION_DURATION_MS}ms ease-in-out`;
             node.style.transform = "translate(0, 0)";
             setTimeout(() => {
               if (node) {
                 node.style.transition = "";
                 node.style.transform = "";
               }
-            }, REPOSITION_DURATION + 50);
+            }, CARD_REPOSITION_DURATION_MS + 50);
           });
         }
       });
       previousPositions.current = {};
     });
-  }, [habits, REPOSITION_DURATION]);
+  }, [habits]);
 
   const handleDelete = async (id) => {
     const habit = habits.find((item) => item.id === id);
     if (!habit) return;
 
-    await deleteHabit(id);
-    const hydrated = await getHabits();
-    setHabits(hydrated);
+    await deleteById(id);
   };
 
   const handleDeleteRequest = (id) => {
@@ -123,7 +95,7 @@ export default function HabitsPage() {
     setTimeout(() => {
       setPendingDeleteId(null);
       setIsModalActive(false);
-    }, MODAL_DURATION);
+    }, MODAL_DURATION_MS);
   };
 
   const handleConfirmDelete = () => {
@@ -139,9 +111,9 @@ export default function HabitsPage() {
           capturePositions();
           handleDelete(targetId);
           setFadeTargetId(null);
-        }, CARD_FADE_DURATION);
-      }, CARD_FADE_DELAY);
-    }, MODAL_DURATION);
+        }, CARD_FADE_DURATION_MS);
+      }, CARD_FADE_DELAY_MS);
+    }, MODAL_DURATION_MS);
   };
 
   const pendingHabit = habits.find((habit) => habit.id === pendingDeleteId);
@@ -150,8 +122,8 @@ export default function HabitsPage() {
     return (
       <div className="mx-auto flex min-h-[70vh] w-full max-w-xl flex-col items-center justify-center gap-5">
         <div className="relative h-14 w-14">
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-200 via-amber-300 to-orange-200 opacity-70 blur-md" />
-          <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-amber-200/70 bg-white shadow-sm">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-200 via-orange-300 to-orange-400 opacity-70 blur-md" />
+          <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-orange-200/70 bg-white shadow-sm">
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700" />
           </div>
         </div>

@@ -12,19 +12,7 @@ import {
   getLastActiveDailyDate,
 } from "../../lib/habitScheduleUtils";
 import { getProgressColor } from "../../lib/progressColor";
-
-const toLocalDate = (value) => {
-  if (!value) return null;
-  if (typeof value === "string") {
-    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (match) {
-      const [_, year, month, day] = match;
-      return new Date(Number(year), Number(month) - 1, Number(day));
-    }
-  }
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
+import { toDateOrNull } from "../../lib/dateUtils";
 
 export default function HabitCard({
   habit,
@@ -56,7 +44,7 @@ export default function HabitCard({
   const weeklyIsAtTarget = isWeekly && weeklyCurrentCount === weeklyTargetCount;
   const weeklyIsComplete = isWeekly && weeklyCurrentCount >= weeklyTargetCount;
   const dailyTargetCount = Math.max(1, habit.timesPerDay || 1);
-  const createdAtLocalDate = toLocalDate(habit.createdAt);
+  const createdAtLocalDate = toDateOrNull(habit.createdAt);
   let dailyReferenceDate = getLastActiveDailyDate(habit);
   if (createdAtLocalDate && dailyReferenceDate < createdAtLocalDate) {
     dailyReferenceDate = createdAtLocalDate;

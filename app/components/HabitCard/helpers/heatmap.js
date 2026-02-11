@@ -1,26 +1,7 @@
 import { normalizeActiveDays } from "../../../lib/habitSchedule";
+import { toDateOrNull, toLocalISODate } from "../../../lib/dateUtils";
 
 const DAYS_TO_SHOW = 250;
-
-const toLocalDate = (value) => {
-  if (!value) return null;
-  if (typeof value === "string") {
-    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (match) {
-      const [_, year, month, day] = match;
-      return new Date(Number(year), Number(month) - 1, Number(day));
-    }
-  }
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const toLocalISODate = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 const LOCAL_DAY_KEY_BY_INDEX = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -38,7 +19,7 @@ export const buildRecentDays = (
   const today = new Date();
   const normalizedActiveDays = normalizeActiveDays(activeDays);
   const isWeekly = goalType === "weekly";
-  const createdAtLocalDate = toLocalDate(createdAt);
+  const createdAtLocalDate = toDateOrNull(createdAt);
   const completionSet = new Set(completions);
   return Array.from({ length: DAYS_TO_SHOW }, (_, index) => {
     const date = new Date();

@@ -1,4 +1,4 @@
-export const NAV_DARK_YELLOW = "#ffcd1f";
+export const NAV_DARK_YELLOW = "#ffb347";
 export const WEEKLY_BRIGHT_GREEN = "#66ff9a";
 export const WEEKLY_SHADE_DARK = "#00a84a";
 export const WEEKLY_SHADE_MEDIUM = "#00c853";

@@ -63,7 +63,7 @@ export default function MagicLinkSection({
         <p
           className={`text-sm ${
             statusTone === "warning"
-              ? "text-amber-700"
+              ? "text-orange-700"
               : statusTone === "success"
                 ? "text-emerald-700"
                 : "text-slate-600"
