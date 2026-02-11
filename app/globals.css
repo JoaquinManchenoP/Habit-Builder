@@ -40,8 +40,8 @@
   --app-bg: #fbfbfb;
   --app-surface: #ffffff;
   --app-text: #33494e;
-  --app-accent: #ffcd1f;
-  --app-accent-dark: #ffcd1f;
+  --app-accent: #ffb347;
+  --app-accent-dark: #ffb347;
   --app-border: rgba(51, 73, 78, 0.12);
   --app-text-muted: rgba(51, 73, 78, 0.7);
   --mobile-topnav-offset: 0px;
@@ -76,7 +76,7 @@
   --color-indigo-600: var(--app-accent);
   --color-indigo-700: var(--app-accent);
 
-  --color-amber-100: rgba(255, 205, 31, 0.22);
+  --color-amber-100: rgba(255, 179, 71, 0.22);
   --color-amber-600: var(--app-accent);
   --color-amber-700: var(--app-accent);
 

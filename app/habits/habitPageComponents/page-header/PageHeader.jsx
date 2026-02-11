@@ -7,14 +7,11 @@ export default function PageHeader({ habitsCount, usingMockData }) {
   return (
     <div className="flex items-center justify-between ">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-slate-900">Habits</h1>
-        <p className="text-sm text-slate-600">
-          Browse the habits stored on this device.
-        </p>
+        <h1 className="text-2xl font-bold text-slate-900">My Habits</h1>
       </div>
       <div className="flex items-center gap-3">
         {usingMockData ? (
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+          <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
             Using mock testing data
           </span>
         ) : null}

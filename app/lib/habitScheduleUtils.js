@@ -1,16 +1,12 @@
 import { WEEKDAY_ORDER } from "./habitSchedule";
+import { toLocalISODate } from "./dateUtils";
+
+export { toLocalISODate } from "./dateUtils";
 
 const LOCAL_DAY_KEY_BY_INDEX = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 export const getLocalDayKey = (date = new Date()) =>
   LOCAL_DAY_KEY_BY_INDEX[date.getDay()];
-
-export const toLocalISODate = (date = new Date()) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 export const countCheckInsOnLocalDate = (checkIns = [], targetDate) => {
   if (!Array.isArray(checkIns) || checkIns.length === 0 || !targetDate) {

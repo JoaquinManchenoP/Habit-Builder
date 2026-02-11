@@ -60,77 +60,44 @@ export default function HabitsList({
     completed.sort(compareByCreatedDesc);
     return { incompleteHabits: incomplete, completedHabits: completed };
   })();
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const renderHabitColumn = (habitList) => (
+    <div className="columns-1 gap-x-3 sm:gap-x-4 min-[1125px]:columns-[460px] min-[1125px]:gap-x-5">
+      {habitList.map((habit) => {
+        const CardComponent =
+          habit.goalType === "weekly"
+            ? WeeklyHabitCardHabitsPage
+            : DailyHabitCardHabitsPage;
+        return (
+          <div
+            key={habit.id}
+            className="mb-3 w-full break-inside-avoid sm:mb-4 min-[1125px]:mb-5"
+          >
+            <CardComponent
+              habit={habit}
+              onComplete={onComplete}
+              onWeeklyCheckIn={onWeeklyCheckIn}
+              onDelete={onDeleteRequest}
+              isCompletedToday={habit.completions?.includes(todayIso)}
+              isFading={fadeTargetId === habit.id}
+              cardRef={(node) => {
+                if (node) {
+                  cardRefs.current[habit.id] = node;
+                } else {
+                  delete cardRefs.current[habit.id];
+                }
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
-      {incompleteHabits.length > 0 ? (
-        <div className="columns-1 gap-x-3 sm:gap-x-4 min-[1125px]:columns-[460px] min-[1125px]:gap-x-5">
-          {incompleteHabits.map((habit) => {
-            const CardComponent =
-              habit.goalType === "weekly"
-                ? WeeklyHabitCardHabitsPage
-                : DailyHabitCardHabitsPage;
-            return (
-              <div
-                key={habit.id}
-                className="mb-3 w-full break-inside-avoid sm:mb-4 min-[1125px]:mb-5"
-              >
-                <CardComponent
-                  habit={habit}
-                  onComplete={onComplete}
-                  onWeeklyCheckIn={onWeeklyCheckIn}
-                  onDelete={onDeleteRequest}
-                  isCompletedToday={habit.completions?.includes(
-                    new Date().toISOString().slice(0, 10)
-                  )}
-                  isFading={fadeTargetId === habit.id}
-                  cardRef={(node) => {
-                    if (node) {
-                      cardRefs.current[habit.id] = node;
-                    } else {
-                      delete cardRefs.current[habit.id];
-                    }
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
-      {completedHabits.length > 0 ? (
-        <div className="columns-1 gap-x-3 sm:gap-x-4 min-[1125px]:columns-[460px] min-[1125px]:gap-x-5">
-          {completedHabits.map((habit) => {
-            const CardComponent =
-              habit.goalType === "weekly"
-                ? WeeklyHabitCardHabitsPage
-                : DailyHabitCardHabitsPage;
-            return (
-              <div
-                key={habit.id}
-                className="mb-3 w-full break-inside-avoid sm:mb-4 min-[1125px]:mb-5"
-              >
-                <CardComponent
-                  habit={habit}
-                  onComplete={onComplete}
-                  onWeeklyCheckIn={onWeeklyCheckIn}
-                  onDelete={onDeleteRequest}
-                  isCompletedToday={habit.completions?.includes(
-                    new Date().toISOString().slice(0, 10)
-                  )}
-                  isFading={fadeTargetId === habit.id}
-                  cardRef={(node) => {
-                    if (node) {
-                      cardRefs.current[habit.id] = node;
-                    } else {
-                      delete cardRefs.current[habit.id];
-                    }
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
+      {incompleteHabits.length > 0 ? renderHabitColumn(incompleteHabits) : null}
+      {completedHabits.length > 0 ? renderHabitColumn(completedHabits) : null}
     </div>
   );
 }

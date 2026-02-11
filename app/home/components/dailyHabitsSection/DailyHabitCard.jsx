@@ -34,7 +34,7 @@ export default function DailyHabitCard({
   }
   const todayCount = countCheckInsOnLocalDate(
     habit.checkIns || [],
-    referenceDate
+    referenceDate,
   );
   const progressPercent = Math.min((todayCount / targetPerDay) * 100, 100);
   const isAtTargetOrAbove = todayCount >= targetPerDay;
@@ -46,20 +46,16 @@ export default function DailyHabitCard({
       onClick={() => onIncrement?.(habit)}
       className="group relative flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
     >
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm">
-          🥕
-        </span>
+      <div className="flex min-w-0 flex-1 items-center gap-3 ml-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <p className="min-w-0 break-words text-sm font-semibold text-slate-900">
               {habit.name}
             </p>
-            <span className="rounded-full bg-[color:var(--app-accent)]/30 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-700">
-              Daily
-            </span>
           </div>
-          <p className="text-xs text-slate-500">Daily goal</p>
+          <span className="rounded-full bg-[color:var(--app-accent)]/30 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-700">
+            Daily
+          </span>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
